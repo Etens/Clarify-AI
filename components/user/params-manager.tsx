@@ -1,7 +1,7 @@
-import { Button } from "../button/Button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../dialog/dialog";
-import { Input } from "../input/SearchBar";
-import { Label } from "../label/Label";
+import { Button } from "../button/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../common/dialog";
+import { Input } from "../common/searchbar";
+import { Label } from "../common/label";
 
 export function ParamsManager() {
   return (

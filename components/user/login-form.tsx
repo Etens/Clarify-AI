@@ -1,14 +1,20 @@
-import { Profil } from "../user/Profil";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, FormValues } from "../../schemas/formSchema";
-import { Form, FormField, FormItem, FormControl, FormLabel, FormDescription, FormMessage } from "../user/Form";
-import { Input } from "../input/SearchBar";
-import { Button } from "../button/Button";
+import { Input } from "../common/searchbar";
+import { Button } from "../button/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "./form";
 
 export function LoginForm() {
-  const form = Profil();
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      // Définissez les valeurs par défaut pour les autres champs ici
+    },
+  });
 
   const onSubmit = (values: FormValues) => {
-    // Ici, on utilise FormValues pour typer les valeurs du formulaire
     console.log(values);
   };
 
@@ -22,7 +28,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="login" {...field} />
+                <Input placeholder="shadcn" {...field} />
               </FormControl>
               <FormDescription>This is your public display name.</FormDescription>
               <FormMessage />

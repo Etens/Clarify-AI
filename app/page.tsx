@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/button/Button";
-import { SaveButton } from "@/components/button/SaveButton";
-import { CopyButton } from "@/components/button/CopyButton";
-import { Input } from "@/components/input/SearchBar";
-import { Progress } from "@/components/loader/Loader";
-import ResultView from "@/components/results//ResultView";
-import { LoginForm } from "@/components/user/LoginForm";
-import { RegisterForm } from "@/components/user/RegisterForm";
-import { ParamsManager } from "@/components/user/ParamsManager";
+import { Button } from "@/components/button/button";
+import { SaveButton } from "@/components/button/save-button";
+import { CopyButton } from "@/components/button/copy-button";
+import { Input } from "@/components/common/searchbar";
+import { Progress } from "@/components/common/loader";
+import { LoginForm } from "@/components/user/login-form";
+import { RegisterForm } from "@/components/user/register-form";
+import { ParamsManager } from "@/components/user/params-manager";
 import { useToast } from "@/components/alert/use-toast";
+import ResultView from "@/components/results/result-view";
 
 export default function Home() {
   const { toast } = useToast();
@@ -34,7 +34,7 @@ export default function Home() {
       <Input />
       <Progress value={10} />
       <ResultView />
-      <LoginForm />
+      {/* <LoginForm /> */}
       <RegisterForm />
       <ParamsManager />
     </main>
