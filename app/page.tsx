@@ -5,8 +5,7 @@ import { SaveButton } from "@/components/button/save-button";
 import { CopyButton } from "@/components/button/copy-button";
 import { Input } from "@/components/common/searchbar";
 import { Progress } from "@/components/common/loader";
-import { LoginForm } from "@/components/user/login-form";
-import { RegisterForm } from "@/components/user/register-form";
+import { InputForm } from "@/components/user/register-form";
 import { ParamsManager } from "@/components/user/params-manager";
 import { useToast } from "@/components/alert/use-toast";
 import ResultView from "@/components/results/result-view";
@@ -32,10 +31,9 @@ export default function Home() {
       <SaveButton />
       <CopyButton />
       <Input />
+      <InputForm />
       <Progress value={10} />
       <ResultView />
-      {/* <LoginForm /> */}
-      <RegisterForm />
       <ParamsManager />
     </main>
   );
