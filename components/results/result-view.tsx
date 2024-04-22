@@ -3,7 +3,25 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 function ResultView() {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-4 items-start">
+      <Card>
+        <CardHeader>
+          <CardTitle>Card Title</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription>Card Description</CardDescription>
+        </CardContent>
+        <CardFooter>Card Footer</CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Card Title</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription>Card Description</CardDescription>
+        </CardContent>
+        <CardFooter>Card Footer</CardFooter>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Card Title</CardTitle>
