@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 function ResultView() {
   return (
-    <div className="grid grid-cols-2 gap-4 items-start">
+    <div className="grid grid-cols-2 gap-4 items-start justify-center">
       <Card>
         <CardHeader>
           <CardTitle>Card Title</CardTitle>
