@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, FormEvent, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useChat } from "ai/react";
 import axios from "axios";
 import ResultView from "../components/results/result-view";
@@ -12,12 +12,29 @@ import { Progress } from "@/components/common/loader";
 export default function Home() {
   const [isLogin, setIsLogin] = useState("Login");
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
+  const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
 
   useEffect(() => {
-    messages.forEach(message => {
-      console.log(`${message.role}: ${message.content}`);
-    });
-  }, [messages]); 
+    if (!isLoading && messages.length > 0) {
+      const assistantMessages = messages.filter((message) => message.role === "assistant");
+
+      const filteredAndParsedMessages = assistantMessages
+        .map((assistantMessage) => {
+          const formattedContent = assistantMessage.content.replace(/\\n/g, "").trim();
+          try {
+            return JSON.parse(formattedContent);
+          } catch (error) {
+            console.error("Erreur lors du parsing du contenu du message de l'assistant:", error);
+            return null;
+          }
+        })
+        .filter((content) => content !== null);
+
+      setAllMessagesReceived(filteredAndParsedMessages);
+      console.log("Messages reçus: ", filteredAndParsedMessages);
+
+    }
+  }, [isLoading, messages]);
 
   return (
     <main>
