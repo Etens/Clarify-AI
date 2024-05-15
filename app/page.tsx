@@ -15,9 +15,15 @@ export default function Home() {
   const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
   const [illustrationLinks, setIllustrationLinks] = useState({});
   const [style, setStyle] = useState("rafiki");
+  const [userPrompt, setUserPrompt] = useState("");
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
+      const userMessage = messages.filter((message) => message.role === "user")[0]?.content;
+      if (userMessage) {
+        setUserPrompt(userMessage);
+        console.log("Prompt saisie par l'utilisateur :", userMessage);
+      }
       const assistantMessages = messages.filter((message) => message.role === "assistant");
 
       const filteredAndParsedMessages = assistantMessages
@@ -101,30 +107,34 @@ export default function Home() {
             <ParamsManager />
             {isLogin === "Login" ? <Button onClick={() => setIsLogin("Logout")}>Logout</Button> : isLogin === "Register" ? <Button onClick={() => setIsLogin("Register")}>Register</Button> : <Button onClick={() => setIsLogin("Login")}>Login</Button>}
           </div>
-          <div className="flex justify-center mt-10">
-            <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
-            <select
-              id="styleSelect"
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              className="p-2 border rounded"
-            >
-              <option value="rafiki">Rafiki</option>
-              <option value="bro">Bro</option>
-              <option value="amico">Amico</option>
-              <option value="pana">Pana</option>
-              <option value="cuate">Cuate</option>
-            </select>
-          </div>
           <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
-              <ResultView elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []} illustrationLinks={illustrationLinks} />
+              <ResultView userPrompt={userPrompt} elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []} illustrationLinks={illustrationLinks} />
             </div>
             <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
               <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
-              <Button type="submit" className="mt-4">
-                Create
-              </Button>
+              <div className="flex justify-center mt-4">
+                <Button type="submit" className="mt-4">
+                  Create
+                </Button>
+                <div className="flex justify-center">
+                  <label htmlFor="styleSelect" className="p-2 text-sm font-semibold">
+                    Select Illustration Style:
+                  </label>
+                  <select
+                    id="styleSelect"
+                    value={style}
+                    onChange={(e) => setStyle(e.target.value)}
+                    className="p-2 border rounded"
+                  >
+                    <option value="rafiki">Rafiki</option>
+                    <option value="bro">Bro</option>
+                    <option value="amico">Amico</option>
+                    <option value="pana">Pana</option>
+                    <option value="cuate">Cuate</option>
+                  </select>
+                </div>
+              </div>
             </form>
           </section>
         </>
