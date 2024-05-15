@@ -15,16 +15,19 @@ export default function Home() {
   const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
   const [illustrationLinks, setIllustrationLinks] = useState({});
 
-
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
       const assistantMessages = messages.filter((message) => message.role === "assistant");
 
       const filteredAndParsedMessages = assistantMessages
         .map((assistantMessage) => {
-          const formattedContent = assistantMessage.content.replace(/\\n/g, "").trim();
+          // Nettoyer le contenu pour retirer les balises de code et les backticks
+          const cleanedContent = assistantMessage.content
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim();
           try {
-            return JSON.parse(formattedContent);
+            return JSON.parse(cleanedContent);
           } catch (error) {
             console.error("Erreur lors du parsing du contenu du message de l'assistant:", error);
             return null;
@@ -32,12 +35,60 @@ export default function Home() {
         })
         .filter((content) => content !== null);
 
-      setAllMessagesReceived(filteredAndParsedMessages);
-      console.log("Messages reçus: ", filteredAndParsedMessages);
-      const firstElement = filteredAndParsedMessages[0].Elements[0];
-      console.log("First Element: ", firstElement);
+      if (filteredAndParsedMessages.length > 0) {
+        console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
+        setAllMessagesReceived(filteredAndParsedMessages);
+        setIllustrationLinks({});
+        fetchIllustrations(filteredAndParsedMessages);
+      }
     }
   }, [messages, isLoading]);
+
+  const fetchIllustrations = async (parsedMessages: any[]) => {
+    console.log("Début de fetchIllustrations");
+
+    // Utiliser le dernier diagramme reçu
+    const latestDiagram = parsedMessages[parsedMessages.length - 1];
+    const elements = latestDiagram?.elements;
+
+    if (!elements) {
+      console.error("Aucun élément trouvé dans le JSON.");
+      return;
+    }
+
+    console.log("Éléments à traiter :", elements);
+
+    const illustrationPromises = elements.map(async (element: any) => {
+      const keywords = element.Keywords.split(", ").map((keyword: string) => keyword.trim());
+      for (let keyword of keywords) {
+        const url = `http://localhost:3000/api/illustrations?keyword=${keyword}`;
+        console.log(`Requête pour le mot-clé ${keyword} à l'URL : ${url}`);
+        try {
+          const response = await axios.get(url);
+          if (response.status === 200 && response.data) {
+            console.log(`URL d'illustration trouvée pour ${element.ElementName} : ${response.data}`);
+            return { element: element.ElementName, url: response.data };
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la récupération de l'illustration pour le mot-clé ${keyword}:`, error);
+        }
+      }
+      return { element: element.ElementName, url: null };
+    });
+
+    const illustrationResults = await Promise.all(illustrationPromises);
+    console.log("Résultats des illustrations :", illustrationResults);
+
+    const newIllustrationLinks = illustrationResults.reduce((acc, curr) => {
+      if (curr.url) {
+        acc[curr.element] = curr.url;
+      }
+      return acc;
+    }, {});
+
+    console.log("Liens d'illustration mis à jour :", newIllustrationLinks);
+    setIllustrationLinks(newIllustrationLinks);
+  };
 
   return (
     <main>
@@ -53,7 +104,7 @@ export default function Home() {
           </div>
           <section className="flex items-center justify-between w-full mt-40 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
-              <ResultView />
+              <ResultView elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []} illustrationLinks={illustrationLinks} />
             </div>
             <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
               <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />

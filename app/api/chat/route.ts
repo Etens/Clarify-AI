@@ -1,10 +1,10 @@
-import OpenAI from 'openai'
-import { OpenAIStream, StreamingTextResponse } from 'ai'
+import OpenAI from 'openai';
+import { OpenAIStream, StreamingTextResponse } from 'ai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
-})
-console.log("API Key: ", process.env.OPENAI_API_KEY)
+});
+console.log("API Key: ", process.env.OPENAI_API_KEY);
 
 interface IAExample {
   user_prompt: string;
@@ -12,9 +12,9 @@ interface IAExample {
     data?: {
       title: string;
       elements: Array<{
-        illustration: string;
-        title: string;
-        explanation: string;
+        ElementName: string;
+        Keywords: string;
+        Explanation: string;
       }>;
     };
   };
@@ -28,8 +28,9 @@ interface IAInstructionsData {
     data: {
       title: string;
       elements: Array<{
-        illustration_keyword: string;
-        explanation: string;
+        ElementName: string;
+        Keywords: string;
+        Explanation: string;
       }>;
     };
   };
@@ -48,24 +49,27 @@ const instructionMessage = {
   role: "system",
   content: `Role: ${aiInstructionsData.role}\n` +
     `Description: ${aiInstructionsData.description}\n` +
-    `Objectif de la réponse: Type - ${aiInstructionsData.response_format.type}, Titre - ${aiInstructionsData.response_format.data.title}, Éléments - ${aiInstructionsData.response_format.data.elements.map(element => `${element.illustration_keyword} \n ${element.explanation}`).join(", ")}\n` +
-    `Style de Langage: Ton - ${aiInstructionsData.language_style.tone}, Complexité - ${aiInstructionsData.language_style.complexity}\n` +
-    `Exemples de Prompt: ${aiInstructionsData.examples.map(example => `Prompt Utilisateur: ${example.user_prompt}`).join(", ")}\n` +
-    `Pratiques recommandées: ${aiInstructionsData.best_practices.join(", ")}\n` +
-    `Pièges à éviter: ${aiInstructionsData.pitfalls_to_avoid.join(", ")}\n`
+    `Objective of the response: Type - ${aiInstructionsData.response_format.type}, Title - ${aiInstructionsData.response_format.data.title}, ` +
+    `Elements - ${aiInstructionsData.response_format.data.elements.map(element => 
+      `ElementName: ${element.ElementName}, Keywords: ${element.Keywords}, Explanation: ${element.Explanation}`
+    ).join(", ")}\n` +
+    `Language Style: Tone - ${aiInstructionsData.language_style.tone}, Complexity - ${aiInstructionsData.language_style.complexity}\n` +
+    `Examples of Prompt: ${aiInstructionsData.examples.map(example => `User Prompt: ${example.user_prompt}, Response: ${JSON.stringify(example.ia_response.data)}`).join(", ")}\n` +
+    `Best Practices: ${aiInstructionsData.best_practices.join(", ")}\n` +
+    `Pitfalls to Avoid: ${aiInstructionsData.pitfalls_to_avoid.join(", ")}\n`
 };
 
 export async function POST(req: Request) {
-  const { messages } = await req.json()
+  const { messages } = await req.json();
 
-  const messagesWithInstructions = [...messages, instructionMessage]
-  console.log("Messages avec instructions: ", messagesWithInstructions)
+  const messagesWithInstructions = [...messages, instructionMessage];
+  console.log("Messages with instructions: ", messagesWithInstructions);
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     stream: true,
     messages: messagesWithInstructions,
-  })
+  });
 
   const stream = OpenAIStream(response);
   return new StreamingTextResponse(stream);

@@ -7,13 +7,12 @@
       "title": "Diagram Title Based on User Input",
       "elements": [
         {
-          "illustration_keyword": "Provide five keywords for each element. These should be in English and chosen not only for their descriptiveness and relevance to the element but also for their common usage in image banks. This approach increases the chances of finding suitable illustrations, as sometimes there may not be an available illustration for a given keyword. For instance, for 'Trading Strategies', you might use 'checklist', 'plan', 'market', 'analysis', 'strategy'. Each keyword should visually evoke the concept in a simplified and accessible manner.",
-          "explanation": "Explanation of the element in question, using clear and accessible language for a broad audience. Explanations must be concise yet informative, providing relevant details without overloading the diagram."
+          "ElementName": "Provide the name of the element.",
+          "Keywords": "Provide five keywords for each element, separated by commas.",
+          "Explanation": "Explanation of the element in question, using clear and accessible language for a broad audience. Explanations must be concise yet informative, providing relevant details without overloading the diagram."
         }
       ]
-      
     }
-
   },
   "language_style": {
     "tone": "Informative and engaging, suitable for a broad audience",
@@ -27,20 +26,24 @@
           "title": "Key Components of Mobile Marketing",
           "elements": [
             {
-              "illustration_keyword": "smartphone-user, mobile, user, technology, engagement",
-              "explanation": "How to capture the attention of mobile users."
+              "ElementName": "Mobile Apps",
+              "Keywords": "smartphone, app store, interface, download, engagement",
+              "Explanation": "Mobile apps are software applications designed to run on mobile devices such as smartphones or tablets. They provide users with convenient access to information, services, or entertainment."
             },
             {
-              "illustration_keyword": "data-transfer, data, analytics, mobile data, usage",
-              "explanation": "Effective use of data to enhance the mobile experience."
+              "ElementName": "Push Notifications",
+              "Keywords": "alert, message, notification, engagement, users",
+              "Explanation": "Push notifications are messages sent from mobile apps to users' devices. They can be used to deliver updates, alerts, or promotions, increasing user engagement and retention."
             },
             {
-              "illustration_keyword": "mobile-ads, advertising, mobile marketing, digital ads, campaigns",
-              "explanation": "Strategies for integrating ads without harming the user experience."
+              "ElementName": "Mobile Advertising",
+              "Keywords": "ad, campaign, targeting, conversion, ROI",
+              "Explanation": "Mobile advertising involves placing ads on mobile devices or within mobile apps to reach a targeted audience. It aims to drive conversions and maximize return on investment (ROI)."
             },
             {
-              "illustration_keyword": "app-development, mobile app, software, coding, application",
-              "explanation": "Creating user-centric mobile applications."
+              "ElementName": "Social Media Marketing",
+              "Keywords": "platforms, content, engagement, followers, brand",
+              "Explanation": "Social media marketing leverages social media platforms to create and share content, engage with followers, and promote a brand. It helps build relationships and boost brand awareness."
             }
           ]
         }
@@ -51,12 +54,15 @@
     "Clearly define the elements before generating the diagram to ensure relevance and accuracy.",
     "Use keywords that enhance the understanding of the concepts presented.",
     "Provide succinct but informative explanations for each element.",
-    "Provide a structured JSON to facilitate integration into applications or websites."
+    "Ensure the JSON structure is consistent and follows the specified format.",
+    "Always generate exactly 4 elements for each diagram."
   ],
   "pitfalls_to_avoid": [
     "Overloading the diagram with too much information or superfluous details.",
     "Using irrelevant or misleading keywords.",
     "Lacking consistency in the style and tone of explanations.",
-    "Omitting essential keywords that could clarify the diagram."
+    "Omitting essential keywords that could clarify the diagram.",
+    "Deviating from the specified JSON structure.",
+    "Generating fewer or more than 4 elements."
   ]
 }
