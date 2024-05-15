@@ -4,6 +4,7 @@ import { OpenAIStream, StreamingTextResponse } from 'ai'
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 })
+console.log("API Key: ", process.env.OPENAI_API_KEY)
 
 interface IAExample {
   user_prompt: string;
@@ -54,16 +55,11 @@ const instructionMessage = {
     `Pièges à éviter: ${aiInstructionsData.pitfalls_to_avoid.join(", ")}\n`
 };
 
-console.log(instructionMessage.content);
-
-console.log("API Key: ", process.env.OPENAI_API_KEY)
-
 export async function POST(req: Request) {
   const { messages } = await req.json()
-  console.log("Messages: ", messages)
 
   const messagesWithInstructions = [...messages, instructionMessage]
-  console.log("Messages with Instructions: ", messagesWithInstructions)
+  console.log("Messages avec instructions: ", messagesWithInstructions)
 
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
@@ -71,8 +67,6 @@ export async function POST(req: Request) {
     messages: messagesWithInstructions,
   })
 
-  const stream = OpenAIStream(response)
-  console.log("Response: ", stream)
-
-  return new StreamingTextResponse(stream)
+  const stream = OpenAIStream(response);
+  return new StreamingTextResponse(stream);
 }

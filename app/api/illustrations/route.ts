@@ -19,7 +19,7 @@ export async function GET(req: NextApiRequestWithUrl) {
       console.log('Récupération du mot-clé avec succès :', keyword);
     }
 
-    const url = `https://storyset.com/illustration/${keyword}/${style}`;
+    const url = `https://storyset.com/search?q=${keyword}`;
     if (!url) {
       return new Response(JSON.stringify({ message: "Missing URL parameter" }), {
         status: 400,
@@ -43,11 +43,11 @@ export async function GET(req: NextApiRequestWithUrl) {
     let imageUrl = null;
     $('script[type="application/ld+json"]').each((_i, elem) => {
       const scriptContent = $(elem).html() as string;
-      const keywordName = keyword.replace(/-/g, ' ');
+      // const keywordName = keyword.replace(/-/g, ' ');
       try {
         const jsonData = JSON.parse(scriptContent);
         if (jsonData['@type'] === 'ImageObject' &&
-          jsonData.name.toLowerCase().replace(/-/g, ' ') === keywordName.toLowerCase() &&
+          // jsonData.name.toLowerCase().replace(/-/g, ' ') === keywordName.toLowerCase() &&
           jsonData.thumbnailUrl.includes(style)) {
           imageUrl = jsonData.thumbnailUrl.replace(/"/g, '');
         }

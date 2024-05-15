@@ -13,6 +13,8 @@ export default function Home() {
   const [isLogin, setIsLogin] = useState("Login");
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
   const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
+  const [illustrationLinks, setIllustrationLinks] = useState({});
+
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
@@ -32,9 +34,10 @@ export default function Home() {
 
       setAllMessagesReceived(filteredAndParsedMessages);
       console.log("Messages reçus: ", filteredAndParsedMessages);
-
+      const firstElement = filteredAndParsedMessages[0].Elements[0];
+      console.log("First Element: ", firstElement);
     }
-  }, [isLoading, messages]);
+  }, [messages, isLoading]);
 
   return (
     <main>
