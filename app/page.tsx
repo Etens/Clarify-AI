@@ -8,6 +8,7 @@ import { Input } from "../components/common/searchbar";
 import { Button } from "../components/button/button";
 import { ParamsManager } from "@/components/user/params-manager";
 import { Progress } from "@/components/common/loader";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState("Login");
@@ -16,6 +17,8 @@ export default function Home() {
   const [illustrationLinks, setIllustrationLinks] = useState({});
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
+  const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
+  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
@@ -44,6 +47,7 @@ export default function Home() {
       if (filteredAndParsedMessages.length > 0) {
         console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
         setAllMessagesReceived(filteredAndParsedMessages);
+        setDiagramHistory((prevHistory) => [...prevHistory, ...filteredAndParsedMessages]);
         setIllustrationLinks({});
         fetchIllustrations(filteredAndParsedMessages);
       }
@@ -95,6 +99,14 @@ export default function Home() {
     setIllustrationLinks(newIllustrationLinks);
   };
 
+  const handlePrev = () => {
+    setCurrentHistoryIndex((prevIndex) => (prevIndex === 0 ? diagramHistory.length - 1 : prevIndex - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentHistoryIndex((prevIndex) => (prevIndex === diagramHistory.length - 1 ? 0 : prevIndex + 1));
+  };
+
   return (
     <main>
       {isLoading ? (
@@ -107,34 +119,50 @@ export default function Home() {
             <ParamsManager />
             {isLogin === "Login" ? <Button onClick={() => setIsLogin("Logout")}>Logout</Button> : isLogin === "Register" ? <Button onClick={() => setIsLogin("Register")}>Register</Button> : <Button onClick={() => setIsLogin("Login")}>Login</Button>}
           </div>
+          <div className="flex justify-center mt-10">
+            <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
+            <select
+              id="styleSelect"
+              value={style}
+              onChange={(e) => setStyle(e.target.value)}
+              className="p-2 border rounded"
+            >
+              <option value="rafiki">Rafiki</option>
+              <option value="bro">Bro</option>
+              <option value="amico">Amico</option>
+              <option value="pana">Pana</option>
+              <option value="cuate">Cuate</option>
+            </select>
+          </div>
           <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
               <ResultView userPrompt={userPrompt} elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []} illustrationLinks={illustrationLinks} />
+              <div className="mt-10">
+                <h2 className="text-xl font-semibold mb-4">Historique des Diagrammes</h2>
+                <div className="flex items-center">
+                  <button onClick={handlePrev} className="mr-4">
+                    <ChevronLeft />
+                  </button>
+                  <div className="flex overflow-x-auto">
+                    {diagramHistory.map((diagram, index) => (
+                      index !== currentHistoryIndex && (
+                        <div key={index} className="transform scale-50 w-full">
+                          <ResultView userPrompt={userPrompt} elements={diagram.elements || []} illustrationLinks={illustrationLinks} />
+                        </div>
+                      )
+                    ))}
+                  </div>
+                  <button onClick={handleNext} className="ml-4">
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
             </div>
             <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
               <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
-              <div className="flex justify-center mt-4">
-                <Button type="submit" className="mt-4">
-                  Create
-                </Button>
-                <div className="flex justify-center">
-                  <label htmlFor="styleSelect" className="p-2 text-sm font-semibold">
-                    Select Illustration Style:
-                  </label>
-                  <select
-                    id="styleSelect"
-                    value={style}
-                    onChange={(e) => setStyle(e.target.value)}
-                    className="p-2 border rounded"
-                  >
-                    <option value="rafiki">Rafiki</option>
-                    <option value="bro">Bro</option>
-                    <option value="amico">Amico</option>
-                    <option value="pana">Pana</option>
-                    <option value="cuate">Cuate</option>
-                  </select>
-                </div>
-              </div>
+              <Button type="submit" className="mt-4">
+                Create
+              </Button>
             </form>
           </section>
         </>
