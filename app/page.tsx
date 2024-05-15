@@ -14,6 +14,7 @@ export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
   const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
   const [illustrationLinks, setIllustrationLinks] = useState({});
+  const [style, setStyle] = useState("rafiki");
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
@@ -21,7 +22,6 @@ export default function Home() {
 
       const filteredAndParsedMessages = assistantMessages
         .map((assistantMessage) => {
-          // Nettoyer le contenu pour retirer les balises de code et les backticks
           const cleanedContent = assistantMessage.content
             .replace(/```json/g, "")
             .replace(/```/g, "")
@@ -47,7 +47,6 @@ export default function Home() {
   const fetchIllustrations = async (parsedMessages: any[]) => {
     console.log("Début de fetchIllustrations");
 
-    // Utiliser le dernier diagramme reçu
     const latestDiagram = parsedMessages[parsedMessages.length - 1];
     const elements = latestDiagram?.elements;
 
@@ -61,7 +60,7 @@ export default function Home() {
     const illustrationPromises = elements.map(async (element: any) => {
       const keywords = element.Keywords.split(", ").map((keyword: string) => keyword.trim());
       for (let keyword of keywords) {
-        const url = `http://localhost:3000/api/illustrations?keyword=${keyword}`;
+        const url = `http://localhost:3000/api/illustrations?keyword=${keyword}&style=${style}`;
         console.log(`Requête pour le mot-clé ${keyword} à l'URL : ${url}`);
         try {
           const response = await axios.get(url);
@@ -102,7 +101,22 @@ export default function Home() {
             <ParamsManager />
             {isLogin === "Login" ? <Button onClick={() => setIsLogin("Logout")}>Logout</Button> : isLogin === "Register" ? <Button onClick={() => setIsLogin("Register")}>Register</Button> : <Button onClick={() => setIsLogin("Login")}>Login</Button>}
           </div>
-          <section className="flex items-center justify-between w-full mt-40 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
+          <div className="flex justify-center mt-10">
+            <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
+            <select
+              id="styleSelect"
+              value={style}
+              onChange={(e) => setStyle(e.target.value)}
+              className="p-2 border rounded"
+            >
+              <option value="rafiki">Rafiki</option>
+              <option value="bro">Bro</option>
+              <option value="amico">Amico</option>
+              <option value="pana">Pana</option>
+              <option value="cuate">Cuate</option>
+            </select>
+          </div>
+          <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
               <ResultView elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []} illustrationLinks={illustrationLinks} />
             </div>

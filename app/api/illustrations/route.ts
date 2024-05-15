@@ -9,7 +9,7 @@ interface NextApiRequestWithUrl extends NextApiRequest {
 export async function GET(req: NextApiRequestWithUrl) {
   try {
     const style = req.nextUrl.searchParams.get('style') || 'rafiki';
-    const keyword = req.nextUrl.searchParams.get('keyword') || 'nature';
+    const keyword = req.nextUrl.searchParams.get('keyword');
     if (!keyword) {
       return new Response(JSON.stringify({ message: "Missing keyword parameter" }), {
         status: 400,
@@ -43,11 +43,9 @@ export async function GET(req: NextApiRequestWithUrl) {
     let imageUrl = null;
     $('script[type="application/ld+json"]').each((_i, elem) => {
       const scriptContent = $(elem).html() as string;
-      // const keywordName = keyword.replace(/-/g, ' ');
       try {
         const jsonData = JSON.parse(scriptContent);
         if (jsonData['@type'] === 'ImageObject' &&
-          // jsonData.name.toLowerCase().replace(/-/g, ' ') === keywordName.toLowerCase() &&
           jsonData.thumbnailUrl.includes(style)) {
           imageUrl = jsonData.thumbnailUrl.replace(/"/g, '');
         }
