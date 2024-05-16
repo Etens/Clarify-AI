@@ -17,7 +17,7 @@ interface ResultViewProps {
 function ResultView({ userPrompt, elements, illustrationLinks }: ResultViewProps) {
   return (
     <div className="flex justify-center items-center">
-      <div className="relative p-3 bg-white shadow-2xl rounded-lg overflow-hidden" style={{ transform: 'scale(0.8)' }}>
+      <div className="relative p-3 bg-white shadow-2xl rounded-lg overflow-hidden scale-[0.8]">
         <div className="grid grid-cols-2 gap-4 items-start justify-center mb-6">
           <Card className="col-span-2 w-full overflow-hidden">
             <CardHeader>

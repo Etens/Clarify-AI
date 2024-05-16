@@ -8,7 +8,8 @@ import { Input } from "../components/common/searchbar";
 import { Button } from "../components/button/button";
 import { ParamsManager } from "@/components/user/params-manager";
 import { Progress } from "@/components/common/loader";
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState("Login");
@@ -18,14 +19,22 @@ export default function Home() {
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
+  const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
 
   useEffect(() => {
+    const savedHistory = Cookies.get('diagramHistory');
+    if (savedHistory) {
+      setDiagramHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  useEffect(() => {
     if (!isLoading && messages.length > 0) {
-      const userMessage = messages.filter((message) => message.role === "user")[0]?.content;
+      const userMessage = messages.filter((message) => message.role === "user").pop()?.content;
       if (userMessage) {
         setUserPrompt(userMessage);
-        console.log("Prompt saisie par l'utilisateur :", userMessage);
+        console.log("Prompt saisi par l'utilisateur :", userMessage);
       }
       const assistantMessages = messages.filter((message) => message.role === "assistant");
 
@@ -46,8 +55,16 @@ export default function Home() {
 
       if (filteredAndParsedMessages.length > 0) {
         console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
+
+        if (lastDisplayedDiagram) {
+          const updatedHistory = [...diagramHistory, { ...lastDisplayedDiagram, userPrompt, illustrationLinks }];
+          setDiagramHistory(updatedHistory);
+          Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
+        }
+
+        setLastDisplayedDiagram({ ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt, illustrationLinks });
+
         setAllMessagesReceived(filteredAndParsedMessages);
-        setDiagramHistory((prevHistory) => [...prevHistory, ...filteredAndParsedMessages]);
         setIllustrationLinks({});
         fetchIllustrations(filteredAndParsedMessages);
       }
@@ -107,6 +124,19 @@ export default function Home() {
     setCurrentHistoryIndex((prevIndex) => (prevIndex === diagramHistory.length - 1 ? 0 : prevIndex + 1));
   };
 
+  const handleDeleteDiagram = (index: number) => {
+    const updatedHistory = diagramHistory.filter((_, i) => i !== index);
+    setDiagramHistory(updatedHistory);
+    Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
+  };
+
+  const handleClearHistory = () => {
+    if (confirm("Are you sure you want to delete all diagrams from the history?")) {
+      setDiagramHistory([]);
+      Cookies.remove('diagramHistory');
+    }
+  };
+
   return (
     <main>
       {isLoading ? (
@@ -136,34 +166,51 @@ export default function Home() {
           </div>
           <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
-              <ResultView userPrompt={userPrompt} elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []} illustrationLinks={illustrationLinks} />
-              <div className="mt-10">
-                <h2 className="text-xl font-semibold mb-4">Historique des Diagrammes</h2>
-                <div className="flex items-center">
-                  <button onClick={handlePrev} className="mr-4">
-                    <ChevronLeft />
-                  </button>
-                  <div className="flex overflow-x-auto">
-                    {diagramHistory.map((diagram, index) => (
-                      index !== currentHistoryIndex && (
-                        <div key={index} className="transform scale-50 w-full">
-                          <ResultView userPrompt={userPrompt} elements={diagram.elements || []} illustrationLinks={illustrationLinks} />
-                        </div>
-                      )
-                    ))}
-                  </div>
-                  <button onClick={handleNext} className="ml-4">
-                    <ChevronRight />
-                  </button>
-                </div>
-              </div>
+              <ResultView
+                userPrompt={userPrompt}
+                elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
+                illustrationLinks={illustrationLinks}
+              />
+              <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
+                <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
+                <Button type="submit" className="mt-4">
+                  Create
+                </Button>
+              </form>
             </div>
-            <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
-              <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
-              <Button type="submit" className="mt-4">
-                Create
-              </Button>
-            </form>
+          </section>
+          <section className="flex flex-col items-center justify-center w-full mt-10 p-0">
+            <h2 className="text-xl font-semibold mb-4 text-center text-white">History</h2>
+            <button onClick={handleClearHistory} className="mb-4 text-red-500 flex items-center text-sm">
+              <Trash2 className="mr-2" /> Clear All
+            </button>
+            <div className="flex items-center">
+              <button onClick={handlePrev}
+                className="mr-4 text-white">
+                <ChevronLeft />
+              </button>
+              <div className="flex overflow-x-auto">
+                {diagramHistory.map((diagram, index) => (
+                  <div key={index} className="relative transform w-full scale-[0.8]">
+                    <button
+                      onClick={() => handleDeleteDiagram(index)}
+                      className="absolute top-0 right-0 text-red-500"
+                    >
+                      <Trash2 />
+                    </button>
+                    <ResultView
+                      userPrompt={diagram.userPrompt}
+                      elements={diagram.elements || []}
+                      illustrationLinks={diagram.illustrationLinks}
+                    />
+                  </div>
+                ))}
+              </div>
+              <button onClick={handleNext}
+                className="ml-4 text-white">
+                <ChevronRight />
+              </button>
+            </div>
           </section>
         </>
       )}
