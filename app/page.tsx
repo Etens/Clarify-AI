@@ -110,7 +110,9 @@ export default function Home() {
   };
 
   function handleDeleteDiagram(index: number): void {
-    throw new Error("Function not implemented.");
+    const updatedHistory = diagramHistory.filter((_, i) => i !== index);
+    setDiagramHistory(updatedHistory);
+    Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
   }
 
   return (
@@ -142,13 +144,15 @@ export default function Home() {
           </div>
           <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
-              <ResultView
-                id="main-diagram"
-                userPrompt={userPrompt}
-                elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
-                illustrationLinks={illustrationLinks}
-                onCopy={() => console.log("Copy current diagram")} 
-              />
+              {allMessagesReceived.length > 0 && (
+                <ResultView
+                  id="main-diagram"
+                  userPrompt={userPrompt}
+                  elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
+                  illustrationLinks={illustrationLinks}
+                  onCopy={() => console.log("Copy current diagram")} 
+                />
+              )}
               <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
                 <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
                 <Button type="submit" className="mt-4">
