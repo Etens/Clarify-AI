@@ -1,13 +1,18 @@
-import { Copy } from "lucide-react";
-import { Button } from "./button";
+import { CircleArrowDown } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
+import { Button } from "./button";
 
-export function CopyButton({ targetId }: { targetId: string }) {
-  const handleCopy = async () => {
+interface DownloadButtonProps {
+  targetId: string;
+  fileName: string; 
+}
+
+export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
+  const handleDownload = async () => {
     const element = document.getElementById(targetId);
     if (element) {
       const originalStyle = element.style.cssText;
-      
+
       element.style.width = '800px';
       element.style.height = 'auto';
       element.style.transform = 'scale(1)';
@@ -25,8 +30,12 @@ export function CopyButton({ targetId }: { targetId: string }) {
         .then((blob) => {
           console.log('Blob généré:', blob); 
           if (blob) {
-            const item = new ClipboardItem({ 'image/png': blob });
-            navigator.clipboard.write([item]);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileName}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
           }
 
           if (promptElement) promptElement.style.display = 'block';
@@ -46,8 +55,8 @@ export function CopyButton({ targetId }: { targetId: string }) {
   };
 
   return (
-    <Button variant="outline" size="icon" onClick={handleCopy} className="copy-button">
-      <Copy className="h-4 w-4" />
+    <Button variant="outline" size="icon" onClick={handleDownload} className="download-button">
+      <CircleArrowDown className="h-4 w-4" />
     </Button>
   );
 }

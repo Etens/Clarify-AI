@@ -24,6 +24,8 @@
     "cheerio": "^1.0.0-rc.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "html-to-image": "^1.11.11",
+    "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
     "jsdom": "^24.0.0",
     "lucide-react": "^0.368.0",

@@ -8,7 +8,7 @@ import { Input } from "../components/common/searchbar";
 import { Button } from "../components/button/button";
 import { ParamsManager } from "@/components/user/params-manager";
 import { Progress } from "@/components/common/loader";
-import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import ClearAllButton from "../components/button/clear-button";
 import Cookies from 'js-cookie';
 
 export default function Home() {
@@ -20,7 +20,6 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
   const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
-  const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
 
   useEffect(() => {
     const savedHistory = Cookies.get('diagramHistory');
@@ -82,8 +81,6 @@ export default function Home() {
       return;
     }
 
-    console.log("Éléments à traiter :", elements);
-
     const illustrationPromises = elements.map(async (element: any) => {
       const keywords = element.Keywords.split(", ").map((keyword: string) => keyword.trim());
       for (let keyword of keywords) {
@@ -92,18 +89,15 @@ export default function Home() {
         try {
           const response = await axios.get(url);
           if (response.status === 200 && response.data) {
-            console.log(`URL d'illustration trouvée pour ${element.ElementName} : ${response.data}`);
             return { element: element.ElementName, url: response.data };
           }
         } catch (error) {
-          console.error(`Erreur lors de la récupération de l'illustration pour le mot-clé ${keyword}:`, error);
         }
       }
       return { element: element.ElementName, url: null };
     });
 
     const illustrationResults = await Promise.all(illustrationPromises);
-    console.log("Résultats des illustrations :", illustrationResults);
 
     const newIllustrationLinks = illustrationResults.reduce((acc, curr) => {
       if (curr.url) {
@@ -112,30 +106,12 @@ export default function Home() {
       return acc;
     }, {});
 
-    console.log("Liens d'illustration mis à jour :", newIllustrationLinks);
     setIllustrationLinks(newIllustrationLinks);
   };
 
-  const handlePrev = () => {
-    setCurrentHistoryIndex((prevIndex) => (prevIndex === 0 ? diagramHistory.length - 1 : prevIndex - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentHistoryIndex((prevIndex) => (prevIndex === diagramHistory.length - 1 ? 0 : prevIndex + 1));
-  };
-
-  const handleDeleteDiagram = (index: number) => {
-    const updatedHistory = diagramHistory.filter((_, i) => i !== index);
-    setDiagramHistory(updatedHistory);
-    Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
-  };
-
-  const handleClearHistory = () => {
-    if (confirm("Are you sure you want to delete all diagrams from the history?")) {
-      setDiagramHistory([]);
-      Cookies.remove('diagramHistory');
-    }
-  };
+  function handleDeleteDiagram(index: number): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <main>
@@ -167,9 +143,11 @@ export default function Home() {
           <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
             <div className="flex flex-col items-center md:mr-20">
               <ResultView
+                id="main-diagram"
                 userPrompt={userPrompt}
                 elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
                 illustrationLinks={illustrationLinks}
+                onCopy={() => console.log("Copy current diagram")} 
               />
               <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
                 <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
@@ -181,35 +159,25 @@ export default function Home() {
           </section>
           <section className="flex flex-col items-center justify-center w-full mt-10 p-0">
             <h2 className="text-xl font-semibold mb-4 text-center text-white">History</h2>
-            <button onClick={handleClearHistory} className="mb-4 text-red-500 flex items-center text-sm">
-              <Trash2 className="mr-2" /> Clear All
-            </button>
+            <ClearAllButton setDiagramHistory={setDiagramHistory} />
             <div className="flex items-center">
-              <button onClick={handlePrev}
-                className="mr-4 text-white">
-                <ChevronLeft />
-              </button>
               <div className="flex overflow-x-auto">
                 {diagramHistory.map((diagram, index) => (
                   <div key={index} className="relative transform w-full scale-[0.8]">
-                    <button
-                      onClick={() => handleDeleteDiagram(index)}
-                      className="absolute top-0 right-0 text-red-500"
-                    >
-                      <Trash2 />
-                    </button>
                     <ResultView
+                      id={`diagram-${index}`}
                       userPrompt={diagram.userPrompt}
                       elements={diagram.elements || []}
                       illustrationLinks={diagram.illustrationLinks}
+                      onCopy={() => console.log("Copy diagram", index)} 
+                      onDelete={() => handleDeleteDiagram(index)}
+                      diagramHistory={diagramHistory}
+                      setDiagramHistory={setDiagramHistory}
+                      index={index}
                     />
                   </div>
                 ))}
               </div>
-              <button onClick={handleNext}
-                className="ml-4 text-white">
-                <ChevronRight />
-              </button>
             </div>
           </section>
         </>

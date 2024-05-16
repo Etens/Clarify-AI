@@ -1,5 +1,6 @@
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/results/illustration-card";
+import { CopyButton } from '../button/copy-button';
+import { DownloadButton } from '../button/download-button';
+import DeleteButton from '../button/delete-button';
 
 interface ElementData {
   ElementName: string;
@@ -9,45 +10,45 @@ interface ElementData {
 }
 
 interface ResultViewProps {
-  userPrompt: string;
+  id: string;
   elements: ElementData[];
   illustrationLinks: { [key: string]: string };
+  userPrompt?: string;
+  onDelete?: () => void;
+  onCopy?: () => void;
+  diagramHistory?: any[];
+  setDiagramHistory?: (history: any[]) => void;
+  index?: number;
 }
 
-function ResultView({ userPrompt, elements, illustrationLinks }: ResultViewProps) {
+const ResultView = ({ id, elements, illustrationLinks, userPrompt, onDelete, diagramHistory, setDiagramHistory, index }: ResultViewProps) => {
   return (
-    <div className="flex justify-center items-center">
-      <div className="relative p-3 bg-white shadow-2xl rounded-lg overflow-hidden scale-[0.8]">
-        <div className="grid grid-cols-2 gap-4 items-start justify-center mb-6">
-          <Card className="col-span-2 w-full overflow-hidden">
-            <CardHeader>
-              <CardTitle>User Prompt</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-sm text-gray-500 dark:text-gray-400 font-light mb-2">
-                {userPrompt}
-              </CardDescription>
-            </CardContent>
-          </Card>
+    <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg relative">
+      <div id={id} className='w-full p-4 rounded-lg'>
+        <div className="flex justify-end absolute top-2 right-2 space-x-2">
+          <CopyButton targetId={id} />
+          <DownloadButton targetId={id} fileName={userPrompt || 'diagram'} />
+          {onDelete && diagramHistory && setDiagramHistory !== undefined && index !== undefined && (
+            <DeleteButton diagramHistory={diagramHistory} setDiagramHistory={setDiagramHistory} index={index} />
+          )}
+        </div>
+        {userPrompt && (
+          <h2 className="text-lg font-semibold mb-4 user-prompt">{userPrompt}</h2>
+        )}
+        <div className="grid grid-cols-2 gap-4">
           {elements.map((element, index) => (
-            <Card key={index} className="w-full h-64 overflow-hidden">
-              <CardHeader>
-                <CardTitle>{element.ElementName}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {illustrationLinks[element.ElementName] && (
-                  <img src={illustrationLinks[element.ElementName]} alt={element.ElementName} className="mb-2 h-20 w-full object-cover" />
-                )}
-                <CardDescription className="text-sm text-gray-500 dark:text-gray-400 font-light mb-2 overflow-hidden text-ellipsis">
-                  {element.Explanation}
-                </CardDescription>
-              </CardContent>
-            </Card>
+            <div key={index} className="p-4 border rounded-lg">
+              <h3 className="text-md font-semibold">{element.ElementName}</h3>
+              {illustrationLinks[element.ElementName] && (
+                <img src={illustrationLinks[element.ElementName]} alt={element.ElementName} className="mb-2" />
+              )}
+              <p className="text-sm text-gray-600">{element.Explanation}</p>
+            </div>
           ))}
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default ResultView;
