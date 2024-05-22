@@ -10,9 +10,10 @@ import { ParamsManager } from "@/components/user/params-manager";
 import { Progress } from "@/components/common/loader";
 import ClearAllButton from "../components/button/clear-button";
 import Cookies from 'js-cookie';
+import { signOut, useSession } from 'next-auth/react';
+import Login from '../components/user/login';
 
 export default function Home() {
-  const [isLogin, setIsLogin] = useState("Login");
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
   const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
   const [illustrationLinks, setIllustrationLinks] = useState({});
@@ -20,6 +21,7 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
   const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const savedHistory = Cookies.get('diagramHistory');
@@ -123,9 +125,25 @@ export default function Home() {
         </div>
       ) : (
         <>
-          <div className="flex justify-end mt-10 mr-10 space-x-4">
-            <ParamsManager />
-            {isLogin === "Login" ? <Button onClick={() => setIsLogin("Logout")}>Logout</Button> : isLogin === "Register" ? <Button onClick={() => setIsLogin("Register")}>Register</Button> : <Button onClick={() => setIsLogin("Login")}>Login</Button>}
+          <div className="flex items-center justify-center min-h-screen">
+            {session ? (
+              <div>
+                <p>Welcome, {session.user?.name}</p>
+                <button
+                  onClick={() => signOut()}
+                  className="px-4 py-2 bg-red-500 text-white rounded"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div>
+                <Login />
+                <p className="flex items-center justify-center min-h-screen text-2xl text-white">
+                  You are not logged in.
+                </p>
+              </div>
+            )}
           </div>
           <div className="flex justify-center mt-10">
             <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
@@ -150,7 +168,7 @@ export default function Home() {
                   userPrompt={userPrompt}
                   elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
                   illustrationLinks={illustrationLinks}
-                  onCopy={() => console.log("Copy current diagram")} 
+                  onCopy={() => console.log("Copy current diagram")}
                 />
               )}
               <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
@@ -173,7 +191,7 @@ export default function Home() {
                       userPrompt={diagram.userPrompt}
                       elements={diagram.elements || []}
                       illustrationLinks={diagram.illustrationLinks}
-                      onCopy={() => console.log("Copy diagram", index)} 
+                      onCopy={() => console.log("Copy diagram", index)}
                       onDelete={() => handleDeleteDiagram(index)}
                       diagramHistory={diagramHistory}
                       setDiagramHistory={setDiagramHistory}
