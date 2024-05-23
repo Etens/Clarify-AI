@@ -16,8 +16,8 @@ export function DeleteButton({ diagramHistory, setDiagramHistory, index }: Delet
   };
 
   return (
-    <Button variant="outline" size="icon" onClick={handleDeleteDiagram} className="delete-button">
-      <Trash2 className="h-4 w-4" />
+    <Button variant="default" size="icon" onClick={handleDeleteDiagram} className="delete-button hover:bg-red-500">
+      <Trash2 className="h-4 w-4 text-white" />
     </Button>
   );
 }

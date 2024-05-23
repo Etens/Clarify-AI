@@ -21,7 +21,7 @@ async function main() {
           image: 'https://lh3.googleusercontent.com/a/ACg8ocLQRQZMirPm1TdFKuhtQGWXmVpVvY3TbypioCQSGOxOGSBG4H3t2Q=s96-c',
           emailVerified: new Date()
         }
-      });
+      });l
       console.log('✅ New user added:', newUser);
     }
 

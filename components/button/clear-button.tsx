@@ -15,8 +15,8 @@ export function ClearAllButton({ setDiagramHistory }: ClearAllButtonProps) {
   };
 
   return (
-    <Button variant="outline" size="icon" onClick={handleClearHistory} className="clear-all-button">
-      <Trash2 className="h-4 w-4" />
+    <Button variant="default" size="icon" onClick={handleClearHistory} className="hover:bg-red-500">
+      <Trash2 className="h-4 w-4 text-white" />
     </Button>
   );
 }

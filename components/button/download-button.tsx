@@ -4,7 +4,7 @@ import { Button } from "./button";
 
 interface DownloadButtonProps {
   targetId: string;
-  fileName: string; 
+  fileName: string;
 }
 
 export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
@@ -28,7 +28,7 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
 
       htmlToImage.toBlob(element)
         .then((blob) => {
-          console.log('Blob généré:', blob); 
+          console.log('Blob généré:', blob);
           if (blob) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -55,8 +55,8 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
   };
 
   return (
-    <Button variant="outline" size="icon" onClick={handleDownload} className="download-button">
-      <CircleArrowDown className="h-4 w-4" />
+    <Button variant="default" size="icon" onClick={handleDownload} className="download-button hover:bg-black-500">
+      <CircleArrowDown className="h-4 w-4 text-white" />
     </Button>
   );
 }

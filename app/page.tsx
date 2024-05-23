@@ -10,8 +10,9 @@ import { ParamsManager } from "@/components/user/params-manager";
 import { Progress } from "@/components/common/loader";
 import ClearAllButton from "../components/button/clear-button";
 import Cookies from 'js-cookie';
-import { signOut, useSession } from 'next-auth/react';
-import Login from '../components/user/login';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Login from "@/components/user/login";
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
@@ -21,7 +22,7 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
   const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const savedHistory = Cookies.get('diagramHistory');
@@ -94,6 +95,7 @@ export default function Home() {
             return { element: element.ElementName, url: response.data };
           }
         } catch (error) {
+          console.error("Erreur lors de la requête pour le mot-clé:", keyword, error);
         }
       }
       return { element: element.ElementName, url: null };
@@ -117,92 +119,102 @@ export default function Home() {
     Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
   }
 
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <main>
-      {isLoading ? (
-        <div className="flex items-center justify-center h-screen">
-          <Progress className="w-1/2" value={50} />
+    <main className="min-h-screen text-white">
+      <header className="flex justify-between p-4">
+        <div></div>
+        {session ? (
+          <button
+            onClick={() => signOut()}
+            className="px-4 py-2 bg-red-500 text-white rounded"
+          >
+            Logout
+          </button>
+        ) : (
+          <Login />
+        )}
+      </header>
+
+      {session ? (
+        <div className="flex flex-col items-center">
+          <p className="text-xl font-semibold mb-4 text-center">
+            Welcome, {session.user?.name}, you are now logged in!
+          </p>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center h-screen bg-black">
+              <Progress className="w-1/2" value={50} />
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-center mt-10">
+                <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
+                <select
+                  id="styleSelect"
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
+                  className="p-2 border rounded text-black"
+                >
+                  <option value="rafiki">Rafiki</option>
+                  <option value="bro">Bro</option>
+                  <option value="amico">Amico</option>
+                  <option value="pana">Pana</option>
+                  <option value="cuate">Cuate</option>
+                </select>
+              </div>
+              <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
+                <div className="flex flex-col items-center md:mr-20">
+                  {allMessagesReceived.length > 0 && (
+                    <ResultView
+                      id="main-diagram"
+                      userPrompt={userPrompt}
+                      elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
+                      illustrationLinks={illustrationLinks}
+                      onCopy={() => console.log("Copy current diagram")}
+                    />
+                  )}
+                  <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
+                    <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
+                    <Button type="submit" className="mt-4">
+                      Create
+                    </Button>
+                  </form>
+                </div>
+              </section>
+              <section className="flex flex-col items-center justify-center w-full mt-10 p-0">
+                <h2 className="text-xl font-semibold mb-4 text-center">History</h2>
+                <ClearAllButton setDiagramHistory={setDiagramHistory} />
+                <div className="flex items-center">
+                  <div className="flex overflow-x-auto">
+                    {diagramHistory.map((diagram, index) => (
+                      <div key={index} className="relative transform w-full scale-[0.8]">
+                        <ResultView
+                          id={`diagram-${index}`}
+                          userPrompt={diagram.userPrompt}
+                          elements={diagram.elements || []}
+                          illustrationLinks={diagram.illustrationLinks}
+                          onCopy={() => console.log("Copy diagram", index)}
+                          onDelete={() => handleDeleteDiagram(index)}
+                          diagramHistory={diagramHistory}
+                          setDiagramHistory={setDiagramHistory}
+                          index={index}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
         </div>
       ) : (
-        <>
-          <div className="flex items-center justify-center min-h-screen">
-            {session ? (
-              <div>
-                <p>Welcome, {session.user?.name}</p>
-                <button
-                  onClick={() => signOut()}
-                  className="px-4 py-2 bg-red-500 text-white rounded"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div>
-                <Login />
-                <p className="flex items-center justify-center min-h-screen text-2xl text-white">
-                  You are not logged in.
-                </p>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-center mt-10">
-            <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
-            <select
-              id="styleSelect"
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              className="p-2 border rounded"
-            >
-              <option value="rafiki">Rafiki</option>
-              <option value="bro">Bro</option>
-              <option value="amico">Amico</option>
-              <option value="pana">Pana</option>
-              <option value="cuate">Cuate</option>
-            </select>
-          </div>
-          <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
-            <div className="flex flex-col items-center md:mr-20">
-              {allMessagesReceived.length > 0 && (
-                <ResultView
-                  id="main-diagram"
-                  userPrompt={userPrompt}
-                  elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
-                  illustrationLinks={illustrationLinks}
-                  onCopy={() => console.log("Copy current diagram")}
-                />
-              )}
-              <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
-                <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
-                <Button type="submit" className="mt-4">
-                  Create
-                </Button>
-              </form>
-            </div>
-          </section>
-          <section className="flex flex-col items-center justify-center w-full mt-10 p-0">
-            <h2 className="text-xl font-semibold mb-4 text-center text-white">History</h2>
-            <ClearAllButton setDiagramHistory={setDiagramHistory} />
-            <div className="flex items-center">
-              <div className="flex overflow-x-auto">
-                {diagramHistory.map((diagram, index) => (
-                  <div key={index} className="relative transform w-full scale-[0.8]">
-                    <ResultView
-                      id={`diagram-${index}`}
-                      userPrompt={diagram.userPrompt}
-                      elements={diagram.elements || []}
-                      illustrationLinks={diagram.illustrationLinks}
-                      onCopy={() => console.log("Copy diagram", index)}
-                      onDelete={() => handleDeleteDiagram(index)}
-                      diagramHistory={diagramHistory}
-                      setDiagramHistory={setDiagramHistory}
-                      index={index}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </>
+        <div className="flex items-center justify-center h-screen bg-black">
+          <p className="text-xl font-semibold text-center">Please log in to use the application.</p>
+        </div>
       )}
     </main>
   );

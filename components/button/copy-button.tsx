@@ -46,8 +46,8 @@ export function CopyButton({ targetId }: { targetId: string }) {
   };
 
   return (
-    <Button variant="outline" size="icon" onClick={handleCopy} className="copy-button">
-      <Copy className="h-4 w-4" />
+    <Button variant="default" size="icon" onClick={handleCopy} className="copy-button hover:bg-black-500">
+      <Copy className="h-4 w-4 text-white" />
     </Button>
   );
 }
