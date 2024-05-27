@@ -6,13 +6,11 @@ import axios from "axios";
 import ResultView from "../components/results/result-view";
 import { Input } from "../components/common/searchbar";
 import { Button } from "../components/button/button";
-import { ParamsManager } from "@/components/user/params-manager";
 import { Progress } from "@/components/common/loader";
 import ClearAllButton from "../components/button/clear-button";
 import Cookies from 'js-cookie';
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Login from "@/components/user/login";
+import { useSession, signOut, signIn } from 'next-auth/react';
+import { ParamsManager } from "@/components/user/params-manager";
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
@@ -125,17 +123,24 @@ export default function Home() {
 
   return (
     <main className="min-h-screen text-white">
-      <header className="flex justify-between p-4">
-        <div></div>
+      <header className="flex justify-end p-4 space-x-4">
         {session ? (
-          <button
-            onClick={() => signOut()}
-            className="px-4 py-2 bg-red-500 text-white rounded"
-          >
-            Logout
-          </button>
+          <>
+            <Button
+              onClick={() => signOut()}
+              variant="destructive"
+            >
+              Logout
+            </Button>
+            <ParamsManager />
+          </>
         ) : (
-          <Login />
+          <Button
+            onClick={() => signIn()}
+            variant="secondary"
+          >
+            Login
+          </Button>
         )}
       </header>
 
