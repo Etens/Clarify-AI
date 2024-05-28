@@ -1,3 +1,4 @@
+// [...nextauth]/route.ts
 import NextAuth, { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
@@ -63,23 +64,14 @@ const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.language = user.language ?? "en";
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update") {
+        return { ...token, ...session.user };
       }
-      return token;
+      return { ...token, ...user };
     },
     async session({ session, token }) {
-      if (token) {
-        session.user = {
-          ...session.user,
-          id: token.id as string,
-          name: token.name as string,
-          language: token.language as string,
-        };
-      }
+      session.user = token as any;
       return session;
     },
   },

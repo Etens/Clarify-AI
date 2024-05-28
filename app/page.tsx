@@ -9,7 +9,7 @@ import { Button } from "../components/button/button";
 import { Progress } from "@/components/common/loader";
 import ClearAllButton from "../components/button/clear-button";
 import Cookies from 'js-cookie';
-import { useSession, signOut, signIn } from 'next-auth/react';
+import { useSession, signOut, signIn, getSession } from 'next-auth/react';
 import { ParamsManager } from "@/components/user/params-manager";
 
 export default function Home() {
@@ -20,7 +20,8 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
   const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
     const savedHistory = Cookies.get('diagramHistory');
@@ -116,6 +117,16 @@ export default function Home() {
     setDiagramHistory(updatedHistory);
     Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
   }
+
+  // const handleProfileUpdate = async () => {
+  //   const updatedSession = await getSession();
+  //   setRefresh((prev) => prev + 1);
+  //   console.log("Session forcibly reloaded and state updated:", updatedSession);
+  // };
+
+  useEffect(() => {
+    console.log("Session updated:", session);
+  }, [session, refresh]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -224,3 +235,4 @@ export default function Home() {
     </main>
   );
 }
+

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut, getSession } from 'next-auth/react';
 import { Button } from "../button/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../common/dialog";
 import { Input } from "../common/searchbar";
@@ -20,7 +20,7 @@ const languages = [
 ];
 
 export function ParamsManager() {
-  const { data: session, status, update } = useSession();
+  const { data: session, update } = useSession();
   const [name, setName] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
   const [email, setEmail] = useState<string>("");
@@ -36,27 +36,29 @@ export function ParamsManager() {
 
   const handleSave = async () => {
     try {
-      const response = await axios.post('/api/profile', {
-        name,
-        language,
-      });
+      const response = await axios.post('/api/auth/profile', { name, language });
       if (response.status === 200) {
         setMessage("Profile updated successfully!");
+        console.log("Profile updated successfully");
 
-        // Update session with new user data
+        // Mettre à jour la session côté client
         await update({
-          ...(session || {}),
+          ...session,
+          trigger: "update",
           user: {
-            ...(session?.user || {}),
+            ...(session?.user ?? {}),
             name,
             language,
           },
         });
 
+        const updatedSession = await getSession();
+        console.log("Session mise à jour:", updatedSession);
       } else {
         setMessage("Failed to update profile.");
+        console.error("Failed to update profile");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('An error occurred while updating the profile:', error);
       setMessage("An error occurred while updating the profile.");
     }

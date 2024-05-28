@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     const updatedUser = await prisma.user.update({
       where: { email: session.user?.email ?? undefined },
-      data: { name, language },
+      data: { name, language},
     });
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error: any) {
