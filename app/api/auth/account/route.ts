@@ -12,15 +12,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const { name, language } = await req.json();
+  const { name, language, profileImage } = await req.json();
 
   try {
     const updatedUser = await prisma.user.update({
       where: { email: session.user?.email ?? undefined },
-      data: { name, language},
+      data: { name, language, profileImage },
     });
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error: any) {
-    return NextResponse.json({ message: 'An error occurred while updating the profile', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'An error occurred while updating the account', error: error.message }, { status: 500 });
   }
 }

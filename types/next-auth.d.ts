@@ -5,11 +5,17 @@ declare module 'next-auth' {
         user?: {
             id?: string;
             language?: string;
+            profileImage?: string;
+            themePreference?: boolean;
+            createdAt?: string;
         } & DefaultSession['user'];
     }
 
     interface User {
         id: string;
         language?: string;
+        profileImage?: string;
+        themePreference?: boolean;
+        createdAt?: string;
     }
 }

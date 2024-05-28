@@ -118,12 +118,6 @@ export default function Home() {
     Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
   }
 
-  // const handleProfileUpdate = async () => {
-  //   const updatedSession = await getSession();
-  //   setRefresh((prev) => prev + 1);
-  //   console.log("Session forcibly reloaded and state updated:", updatedSession);
-  // };
-
   useEffect(() => {
     console.log("Session updated:", session);
   }, [session, refresh]);
@@ -137,12 +131,6 @@ export default function Home() {
       <header className="flex justify-end p-4 space-x-4">
         {session ? (
           <>
-            <Button
-              onClick={() => signOut()}
-              variant="destructive"
-            >
-              Logout
-            </Button>
             <ParamsManager />
           </>
         ) : (

@@ -11,10 +11,12 @@ model User {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
   email          String   @unique
-  password       String?
   image          String?
-  emailVerified  DateTime?  
-  language       String? @default("en")
+  profileImage   String?
+  emailVerified  DateTime?
+  language       String?  @default("en")
+  createdAt      DateTime @default(now())
+  themePreference Boolean  @default(false)
   accounts       Account[]
   sessions       Session[]
 }
