@@ -19,6 +19,7 @@ model User {
   themePreference Boolean  @default(false)
   accounts       Account[]
   sessions       Session[]
+  password       String?
 }
 
 model Account {

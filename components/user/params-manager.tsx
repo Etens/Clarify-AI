@@ -1,24 +1,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSession, signOut, getSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { Button } from "../button/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../common/dialog";
 import { Input } from "../common/searchbar";
 import { Label } from "../common/label";
 import axios from 'axios';
+import { useI18n } from '@/locales/client'; 
 
 const languages = [
   { code: 'en', name: 'English' },
   { code: 'fr', name: 'French' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'zh', name: 'Chinese' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'ar', name: 'Arabic' },
 ];
 
 const generateAvatarUrl = (seed: string) => {
@@ -32,6 +25,7 @@ const generateAvatarUrl = (seed: string) => {
 
 export function ParamsManager() {
   const { data: session, update } = useSession();
+  const t = useI18n(); 
   const [name, setName] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
   const [email, setEmail] = useState<string>("");
@@ -43,6 +37,7 @@ export function ParamsManager() {
 
   useEffect(() => {
     if (session?.user) {
+      console.log("Session user data:", session.user);
       setName(session.user.name ?? "");
       setEmail(session.user.email ?? "");
       setLanguage(session.user.language ?? "en");
@@ -54,10 +49,12 @@ export function ParamsManager() {
   }, [session]);
 
   const handleSave = async () => {
+    console.log("Saving with language:", language);
     try {
-      const response = await axios.post('/api/auth/account', { name, language, image: profileImage, themePreference });
+      const response = await axios.post('/api/auth/account', { name, language, profileImage, themePreference });
+      console.log("API response:", response);
       if (response.status === 200) {
-        setMessage("Account updated successfully!");
+        setMessage(t('account.updated'));
 
         await update({
           ...session,
@@ -70,16 +67,13 @@ export function ParamsManager() {
             themePreference,
           },
         });
-
-        const updatedSession = await getSession();
-        console.log("Session mise à jour:", updatedSession);
       } else {
-        setMessage("Failed to update account.");
+        setMessage(t('account.updateFailed'));
         console.error("Failed to update account");
       }
     } catch (error) {
       console.error('An error occurred while updating the account:', error);
-      setMessage("An error occurred while updating the account.");
+      setMessage(t('account.error'));
     }
   };
 
@@ -91,12 +85,12 @@ export function ParamsManager() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">Account</Button>
+        <Button variant="secondary">{t('account.title')}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Account</DialogTitle>
-          <DialogDescription>Make changes to your account here. Click save when you're done.</DialogDescription>
+          <DialogTitle>{t('account.title')}</DialogTitle>
+          <DialogDescription>{t('account.description')}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col space-y-4 p-4">
           <div className="flex flex-col items-center space-y-2">
@@ -104,23 +98,23 @@ export function ParamsManager() {
             <Button onClick={generateAvatar} size="sm">Generate Avatar</Button>
           </div>
           <div className="flex flex-col space-y-2">
-            <Label htmlFor="name" className="text-left">Display Name</Label>
+            <Label htmlFor="name" className="text-left">{t('account.displayName')}</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
           </div>
           <div className="flex flex-col space-y-2">
-            <Label htmlFor="username" className="text-left">Username</Label>
+            <Label htmlFor="username" className="text-left">{t('account.username')}</Label>
             <Input id="username" value={username} readOnly className="col-span-3 bg-gray-100 cursor-not-allowed" />
           </div>
           <div className="flex flex-col space-y-2">
-            <Label htmlFor="email" className="text-left">Email</Label>
+            <Label htmlFor="email" className="text-left">{t('account.email')}</Label>
             <Input id="email" value={email} readOnly className="col-span-3 bg-gray-100 cursor-not-allowed" />
           </div>
           <div className="flex flex-col space-y-2">
-            <Label htmlFor="createdAt" className="text-left">Account Created At</Label>
+            <Label htmlFor="createdAt" className="text-left">{t('account.createdAt')}</Label>
             <Input id="createdAt" value={createdAt} readOnly className="col-span-3 bg-gray-100 cursor-not-allowed" />
           </div>
           <div className="flex items-center space-x-2">
-            <Label htmlFor="themePreference" className="text-left">Dark Mode</Label>
+            <Label htmlFor="themePreference" className="text-left">{t('account.darkMode')}</Label>
             <input
               type="checkbox"
               id="themePreference"
@@ -130,7 +124,7 @@ export function ParamsManager() {
             />
           </div>
           <div className="flex flex-col space-y-2">
-            <Label htmlFor="language" className="text-left">Language</Label>
+            <Label htmlFor="language" className="text-left">{t('account.language')}</Label>
             <select
               id="language"
               value={language}
@@ -149,10 +143,10 @@ export function ParamsManager() {
           onClick={() => signOut()}
           variant="destructive"
         >
-          Logout
+          {t('account.logout')}
         </Button>
         <DialogFooter>
-          <Button type="button" onClick={handleSave}>Save changes</Button>
+          <Button type="button" onClick={handleSave}>{t('account.save')}</Button>
         </DialogFooter>
         {message && (
           <div className={`p-4 mt-4 rounded ${message.includes("successfully") ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>

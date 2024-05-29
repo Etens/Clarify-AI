@@ -1,5 +1,8 @@
 import OpenAI from 'openai';
 import { OpenAIStream, StreamingTextResponse } from 'ai';
+import { getServerSession } from 'next-auth/next';
+import { NextRequest } from 'next/server';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -59,10 +62,22 @@ const instructionMessage = {
     `Pitfalls to Avoid: ${aiInstructionsData.pitfalls_to_avoid.join(", ")}\n`
 };
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
+export async function POST(req: NextRequest) {
+  const session = await getServerSession({ req, ...authOptions });
 
-  const messagesWithInstructions = [...messages, instructionMessage];
+  if (!session) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  const { messages } = await req.json();
+  const language = session.user?.language || 'en';
+
+  const languageInstruction = {
+    role: "system",
+    content: `Please respond in ${language}.`
+  };
+
+  const messagesWithInstructions = [...messages, instructionMessage, languageInstruction];
   console.log("Messages with instructions: ", messagesWithInstructions);
 
   const response = await openai.chat.completions.create({

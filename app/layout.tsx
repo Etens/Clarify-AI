@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { Toaster } from "@/components/alert/toaster";
-import Providers from '@/components/user/providers'; 
+import Providers from '@/components/user/providers';
+import I18nProviderWrapper from '@/components/I18nProviderWrapper'; // Import du I18nProviderWrapper
 
 export const metadata: Metadata = {
   title: "Clarify",
@@ -15,12 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en"> 
       <head />
       <body>
-        <Providers> 
-          <main>{children}</main>
-          <Toaster />
+        <Providers>
+          <I18nProviderWrapper> 
+            <main>{children}</main>
+            <Toaster />
+          </I18nProviderWrapper>
         </Providers>
       </body>
     </html>

@@ -9,8 +9,9 @@ import { Button } from "../components/button/button";
 import { Progress } from "@/components/common/loader";
 import ClearAllButton from "../components/button/clear-button";
 import Cookies from 'js-cookie';
-import { useSession, signOut, signIn, getSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { ParamsManager } from "@/components/user/params-manager";
+import { useI18n } from '@/locales/client'; 
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
@@ -20,8 +21,8 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
   const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
-  const { data: session, status, update } = useSession();
-  const [refresh, setRefresh] = useState(0);
+  const { data: session, status } = useSession();
+  const t = useI18n(); 
 
   useEffect(() => {
     const savedHistory = Cookies.get('diagramHistory');
@@ -120,10 +121,10 @@ export default function Home() {
 
   useEffect(() => {
     console.log("Session updated:", session);
-  }, [session, refresh]);
+  }, [session]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return <div>{t('home.loading')}</div>;
   }
 
   return (
@@ -138,7 +139,7 @@ export default function Home() {
             onClick={() => signIn()}
             variant="secondary"
           >
-            Login
+            {t('home.loginPrompt')}
           </Button>
         )}
       </header>
@@ -146,7 +147,7 @@ export default function Home() {
       {session ? (
         <div className="flex flex-col items-center">
           <p className="text-xl font-semibold mb-4 text-center">
-            Welcome, {session.user?.name}, you are now logged in!
+            {t('home.welcome', { name: session.user?.name })}
           </p>
 
           {isLoading ? (
@@ -156,7 +157,7 @@ export default function Home() {
           ) : (
             <>
               <div className="flex justify-center mt-10">
-                <label htmlFor="styleSelect" className="mr-4">Select Illustration Style:</label>
+                <label htmlFor="styleSelect" className="mr-4">{t('home.selectStyle')}</label>
                 <select
                   id="styleSelect"
                   value={style}
@@ -170,27 +171,27 @@ export default function Home() {
                   <option value="cuate">Cuate</option>
                 </select>
               </div>
-              <section className="flex items-center justify-between w-full mt-10 p-0 flex-col md:flex-row md:p-24 lg:justify-center">
-                <div className="flex flex-col items-center md:mr-20">
+              <section className="flex items-center w-full mt-10 flex-col md:p-24 lg:justify-center">
+                <div className="flex flex-col items-center">
                   {allMessagesReceived.length > 0 && (
                     <ResultView
                       id="main-diagram"
                       userPrompt={userPrompt}
                       elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
                       illustrationLinks={illustrationLinks}
-                      onCopy={() => console.log("Copy current diagram")}
+                      onCopy={() => console.log(t('home.copyDiagram'))}
                     />
                   )}
                   <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
-                    <Input type="text" value={input} onChange={handleInputChange} placeholder="Create..." />
+                    <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} />
                     <Button type="submit" className="mt-4">
-                      Create
+                      {t('home.createPrompt')}
                     </Button>
                   </form>
                 </div>
               </section>
               <section className="flex flex-col items-center justify-center w-full mt-10 p-0">
-                <h2 className="text-xl font-semibold mb-4 text-center">History</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center">{t('home.history')}</h2>
                 <ClearAllButton setDiagramHistory={setDiagramHistory} />
                 <div className="flex items-center">
                   <div className="flex overflow-x-auto">
@@ -201,7 +202,7 @@ export default function Home() {
                           userPrompt={diagram.userPrompt}
                           elements={diagram.elements || []}
                           illustrationLinks={diagram.illustrationLinks}
-                          onCopy={() => console.log("Copy diagram", index)}
+                          onCopy={() => console.log(t('home.copyDiagram'), index)}
                           onDelete={() => handleDeleteDiagram(index)}
                           diagramHistory={diagramHistory}
                           setDiagramHistory={setDiagramHistory}
@@ -217,10 +218,9 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen bg-black">
-          <p className="text-xl font-semibold text-center">Please log in to use the application.</p>
+          <p className="text-xl font-semibold text-center">{t('home.loginPrompt')}</p>
         </div>
       )}
     </main>
   );
 }
-
