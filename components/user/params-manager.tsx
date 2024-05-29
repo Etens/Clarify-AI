@@ -7,11 +7,20 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "../common/searchbar";
 import { Label } from "../common/label";
 import axios from 'axios';
-import { useI18n } from '@/locales/client'; 
+import { useI18n } from '@/locales/client';
 
 const languages = [
   { code: 'en', name: 'English' },
   { code: 'fr', name: 'French' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'de', name: 'German' },
+  { code: 'it', name: 'Italian' },
+  { code: 'pt', name: 'Portuguese' },
+  { code: 'zh', name: 'Chinese' },
+  { code: 'ja', name: 'Japanese' },
+  { code: 'ru', name: 'Russian' },
+  { code: 'he', name: 'Hebrew' },
+  { code: 'ar', name: 'Arabic' },
 ];
 
 const generateAvatarUrl = (seed: string) => {
@@ -25,7 +34,7 @@ const generateAvatarUrl = (seed: string) => {
 
 export function ParamsManager() {
   const { data: session, update } = useSession();
-  const t = useI18n(); 
+  const t = useI18n();
   const [name, setName] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
   const [email, setEmail] = useState<string>("");
@@ -95,7 +104,7 @@ export function ParamsManager() {
         <div className="flex flex-col space-y-4 p-4">
           <div className="flex flex-col items-center space-y-2">
             <img src={profileImage} alt="Profile" className="w-24 h-24 rounded-full" />
-            <Button onClick={generateAvatar} size="sm">Generate Avatar</Button>
+            <Button onClick={generateAvatar} size="sm">{t('account.generateAvatar')}</Button>
           </div>
           <div className="flex flex-col space-y-2">
             <Label htmlFor="name" className="text-left">{t('account.displayName')}</Label>

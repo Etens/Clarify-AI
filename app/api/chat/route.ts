@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
   const languageInstruction = {
     role: "system",
-    content: `Please respond in ${language}.`
+    content: `Please respond in ${language} for all parts of the response, except for keywords which should remain in English. Ensure that the text generated for each element is in ${language} and the keywords are in English.`
   };
 
   const messagesWithInstructions = [...messages, instructionMessage, languageInstruction];

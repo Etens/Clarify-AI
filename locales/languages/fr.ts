@@ -19,4 +19,5 @@ export default {
     'home.createPrompt': 'Créer...',
     'home.history': 'Historique',
     'home.copyDiagram': 'Copier le diagramme actuel',
+    'account.generateAvatar': 'Générer un avatar',
 } as const;
