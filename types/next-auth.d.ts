@@ -8,6 +8,7 @@ declare module 'next-auth' {
             profileImage?: string;
             themePreference?: boolean;
             createdAt?: string;
+            diagrams?: any[];
         } & DefaultSession['user'];
     }
 
@@ -17,5 +18,6 @@ declare module 'next-auth' {
         profileImage?: string;
         themePreference?: boolean;
         createdAt?: string;
+        diagrams?: any[];
     }
 }

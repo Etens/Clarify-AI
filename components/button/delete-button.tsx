@@ -1,6 +1,7 @@
 import { Button } from "./button";
 import { Trash2 } from 'lucide-react';
-import Cookies from 'js-cookie';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
 
 interface DeleteButtonProps {
   diagramHistory: any[];
@@ -9,10 +10,34 @@ interface DeleteButtonProps {
 }
 
 export function DeleteButton({ diagramHistory, setDiagramHistory, index }: DeleteButtonProps) {
-  const handleDeleteDiagram = () => {
+  const { data: session, update } = useSession();
+
+  const handleDeleteDiagram = async () => {
     const updatedHistory = diagramHistory.filter((_, i) => i !== index);
     setDiagramHistory(updatedHistory);
-    Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
+    await saveDiagrams(updatedHistory);
+
+    update({
+      ...session,
+      trigger: "update",
+      user: {
+        ...(session?.user ?? {}),
+        diagrams: updatedHistory,
+      },
+    });
+  };
+
+  const saveDiagrams = async (diagrams: any[]) => {
+    try {
+      const response = await axios.post('/api/auth/diagrams', { diagrams });
+      if (response.status === 200) {
+        console.log("Diagrams updated successfully");
+      } else {
+        console.error("Failed to update diagrams");
+      }
+    } catch (error) {
+      console.error('An error occurred while updating diagrams:', error);
+    }
   };
 
   return (

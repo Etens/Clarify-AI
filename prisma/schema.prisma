@@ -17,6 +17,7 @@ model User {
   language       String?  @default("en")
   createdAt      DateTime @default(now())
   themePreference Boolean  @default(false)
+  diagrams       Json?    
   accounts       Account[]
   sessions       Session[]
   password       String?

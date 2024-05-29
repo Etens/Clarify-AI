@@ -8,10 +8,18 @@ import { Input } from "../components/common/searchbar";
 import { Button } from "../components/button/button";
 import { Progress } from "@/components/common/loader";
 import ClearAllButton from "../components/button/clear-button";
-import Cookies from 'js-cookie';
 import { useSession, signIn } from 'next-auth/react';
 import { ParamsManager } from "@/components/user/params-manager";
-import { useI18n } from '@/locales/client'; 
+import { useI18n } from '@/locales/client';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/common/select"
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
@@ -21,15 +29,14 @@ export default function Home() {
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
   const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
-  const { data: session, status } = useSession();
-  const t = useI18n(); 
+  const { data: session, status, update } = useSession();
+  const t = useI18n();
 
   useEffect(() => {
-    const savedHistory = Cookies.get('diagramHistory');
-    if (savedHistory) {
-      setDiagramHistory(JSON.parse(savedHistory));
+    if (session?.user?.diagrams) {
+      setDiagramHistory(session.user.diagrams);
     }
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
@@ -58,25 +65,19 @@ export default function Home() {
       if (filteredAndParsedMessages.length > 0) {
         console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
 
-        if (lastDisplayedDiagram) {
-          const updatedHistory = [...diagramHistory, { ...lastDisplayedDiagram, userPrompt, illustrationLinks }];
-          setDiagramHistory(updatedHistory);
-          Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
-        }
+        const newDiagram = { ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt };
 
-        setLastDisplayedDiagram({ ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt, illustrationLinks });
-
+        setLastDisplayedDiagram(newDiagram);
         setAllMessagesReceived(filteredAndParsedMessages);
-        setIllustrationLinks({});
-        fetchIllustrations(filteredAndParsedMessages);
+        fetchIllustrations(newDiagram, filteredAndParsedMessages);
       }
     }
   }, [messages, isLoading]);
 
-  const fetchIllustrations = async (parsedMessages: any[]) => {
+  const fetchIllustrations = async (newDiagram: any, parsedMessages: any[]) => {
     console.log("Début de fetchIllustrations");
 
-    const latestDiagram = parsedMessages[parsedMessages.length - 1];
+    const latestDiagram = newDiagram;
     const elements = latestDiagram?.elements;
 
     if (!elements) {
@@ -87,7 +88,7 @@ export default function Home() {
     const illustrationPromises = elements.map(async (element: any) => {
       const keywords = element.Keywords.split(", ").map((keyword: string) => keyword.trim());
       for (let keyword of keywords) {
-        const url = `http://localhost:3000/api/illustrations?keyword=${keyword}&style=${style}`;
+        const url = `/api/illustrations?keyword=${keyword}&style=${style}`;
         console.log(`Requête pour le mot-clé ${keyword} à l'URL : ${url}`);
         try {
           const response = await axios.get(url);
@@ -111,12 +112,51 @@ export default function Home() {
     }, {});
 
     setIllustrationLinks(newIllustrationLinks);
+
+    // Ajoutez le nouveau diagramme à l'historique et sauvegardez-le après avoir récupéré les illustrations
+    const updatedDiagram = { ...newDiagram, illustrationLinks: newIllustrationLinks };
+    const updatedHistory = [...diagramHistory, updatedDiagram];
+    setDiagramHistory(updatedHistory);
+    saveDiagrams(updatedHistory);
+
+    // Mettez à jour la session utilisateur
+    update({
+      ...session,
+      trigger: "update",
+      user: {
+        ...(session?.user ?? {}),
+        diagrams: updatedHistory,
+      },
+    });
+  };
+
+  const saveDiagrams = async (diagrams: any[]) => {
+    try {
+      const response = await axios.post('/api/auth/diagrams', { diagrams });
+      if (response.status === 200) {
+        console.log("Diagrams saved successfully");
+      } else {
+        console.error("Failed to save diagrams");
+      }
+    } catch (error) {
+      console.error('An error occurred while saving diagrams:', error);
+    }
   };
 
   function handleDeleteDiagram(index: number): void {
     const updatedHistory = diagramHistory.filter((_, i) => i !== index);
     setDiagramHistory(updatedHistory);
-    Cookies.set('diagramHistory', JSON.stringify(updatedHistory));
+    saveDiagrams(updatedHistory);
+
+    // Mettez à jour la session utilisateur
+    update({
+      ...session,
+      trigger: "update",
+      user: {
+        ...(session?.user ?? {}),
+        diagrams: updatedHistory,
+      },
+    });
   }
 
   useEffect(() => {
@@ -146,53 +186,13 @@ export default function Home() {
 
       {session ? (
         <div className="flex flex-col items-center">
-          <p className="text-xl font-semibold mb-4 text-center">
-            {t('home.welcome', { name: session.user?.name })}
-          </p>
-
           {isLoading ? (
             <div className="flex items-center justify-center h-screen bg-black">
               <Progress className="w-1/2" value={50} />
             </div>
           ) : (
             <>
-              <div className="flex justify-center mt-10">
-                <label htmlFor="styleSelect" className="mr-4">{t('home.selectStyle')}</label>
-                <select
-                  id="styleSelect"
-                  value={style}
-                  onChange={(e) => setStyle(e.target.value)}
-                  className="p-2 border rounded text-black"
-                >
-                  <option value="rafiki">Rafiki</option>
-                  <option value="bro">Bro</option>
-                  <option value="amico">Amico</option>
-                  <option value="pana">Pana</option>
-                  <option value="cuate">Cuate</option>
-                </select>
-              </div>
-              <section className="flex items-center w-full mt-10 flex-col md:p-24 lg:justify-center">
-                <div className="flex flex-col items-center">
-                  {allMessagesReceived.length > 0 && (
-                    <ResultView
-                      id="main-diagram"
-                      userPrompt={userPrompt}
-                      elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
-                      illustrationLinks={illustrationLinks}
-                      onCopy={() => console.log(t('home.copyDiagram'))}
-                    />
-                  )}
-                  <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
-                    <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} />
-                    <Button type="submit" className="mt-4">
-                      {t('home.createPrompt')}
-                    </Button>
-                  </form>
-                </div>
-              </section>
-              <section className="flex flex-col items-center justify-center w-full mt-10 p-0">
-                <h2 className="text-xl font-semibold mb-4 text-center">{t('home.history')}</h2>
-                <ClearAllButton setDiagramHistory={setDiagramHistory} />
+              <section className="flex flex-col items-center justify-center w-full p-0">
                 <div className="flex items-center">
                   <div className="flex overflow-x-auto">
                     {diagramHistory.map((diagram, index) => (
@@ -211,6 +211,45 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </section>
+              <section className="flex items-center w-full flex-col mb-32 lg:justify-center">
+                <div className="flex flex-col items-center w-full">
+                  {allMessagesReceived.length > 0 && (
+                    <ResultView
+                      id="main-diagram"
+                      userPrompt={userPrompt}
+                      elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
+                      illustrationLinks={illustrationLinks}
+                      onCopy={() => console.log(t('home.copyDiagram'))}
+                    />
+                  )}
+                  <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
+                    <div className="flex items-center justify-center w-full space-x-4">
+                      <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} className="w-96" />
+                      <Button type="submit" className="w-24" variant="secondary">
+                        {t('home.createPrompt')}
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-center mt-4 space-x-4">
+                      <Select>
+                        <SelectTrigger className="bg-primary p-2 rounded text-white w-24">
+                          <SelectValue placeholder="Style" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Style</SelectLabel>
+                            <SelectItem value="rafiki">Rafiki</SelectItem>
+                            <SelectItem value="bro">Bro</SelectItem>
+                            <SelectItem value="amico">Amico</SelectItem>
+                            <SelectItem value="pana">Pana</SelectItem>
+                            <SelectItem value="cuate">Cuate</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <ClearAllButton setDiagramHistory={setDiagramHistory} />
+                    </div>
+                  </form>
                 </div>
               </section>
             </>
