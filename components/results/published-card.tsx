@@ -2,8 +2,6 @@ import React from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/results/card';
 import { CopyButton } from '../button/copy-button';
 import { DownloadButton } from '../button/download-button';
-import LikeButton from '../button/like_button';
-import ViewCount from '../results/view-count';
 
 interface PublishedCardProps {
   diagram: any;
@@ -16,7 +14,7 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
     <Card className="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg scale-75">
       <CardHeader className="flex justify-between items-center w-full p-4 rounded-t-lg bg-gradient-to-r from-blue-500 to-purple-600">
         <div className="flex w-full h-full items-center justify-between">
-          <div className="flex flex-col space-y-2 items-center justify-center">
+          <div className="flex flex-col space-y-2 items-center justify-center ml-9">
             {diagram.userImage ? (
               <img src={diagram.userImage} alt={diagram.userName} className="w-32 h-32 rounded-full" />
             ) : (
@@ -30,7 +28,7 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
             <h1 className="text-xl font-semibold text-white">
               {diagram.title}
             </h1>
-            <p className="text-sm text-white font-light text-center w-3/4">
+            <p className="text-sm text-white font-light w-3/4">
               {diagram.userPrompt}
             </p>
           </div>
@@ -53,8 +51,6 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
 
       <CardFooter className="flex items-center justify-between w-full p-4 rounded-b-lg mt-2">
         <div className="flex items-center space-x-6">
-          <LikeButton diagramId={diagram.id} />
-          <ViewCount diagramId={diagram.id} />
         </div>
         <div className="flex space-x-2">
           <CopyButton targetId={`published-diagram-${diagram.userPrompt}`} />

@@ -8,33 +8,20 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  name           String?
-  email          String   @unique
-  image          String?
-  profileImage   String?
-  emailVerified  DateTime?
-  language       String?  @default("en")
-  createdAt      DateTime @default(now())
-  themePreference Boolean  @default(false)
-  diagrams       Diagram[] @relation("UserDiagrams")
-  accounts       Account[]
-  sessions       Session[]
-  password       String?
-}
-
-model Diagram {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  title             String
-  elements          Json
-  userPrompt        String
-  illustrationLinks Json
-  createdAt         DateTime @default(now())
-  userId            String   @db.ObjectId
-  user              User     @relation(fields: [userId], references: [id], name: "UserDiagrams")
-  published         Boolean  @default(false) 
-  views             Int      @default(0)     
-  userImage         String   
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String?
+  email            String   @unique
+  image            String?
+  profileImage     String?
+  emailVerified    DateTime?
+  language         String?  @default("en")
+  createdAt        DateTime @default(now())
+  themePreference  Boolean  @default(false)
+  diagrams         Json     @default("[]")
+  diagramsPublished Json    @default("[]")
+  accounts         Account[]
+  sessions         Session[]
+  password         String?
 }
 
 model Account {

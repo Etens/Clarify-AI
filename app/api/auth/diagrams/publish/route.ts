@@ -15,8 +15,6 @@ const checkHeaders = (req: NextRequest): NextResponse | null => {
 };
 
 export async function POST(req: NextRequest) {
-    console.log('📥 Incoming POST request');
-
     const headerCheck = checkHeaders(req);
     if (headerCheck) return headerCheck;
 
@@ -28,18 +26,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { postedDiagrams } = await req.json();
+    const { diagramsPublished } = await req.json();
 
     try {
-        console.log('🛠 Updating user posted diagrams for email:', session.user?.email);
+        console.log('🔍 Diagrams published:', diagramsPublished);
+        console.log('🛠 Publish user diagrams for email:', session.user?.email);
         const updatedUser = await prisma.user.update({
             where: { email: session.user?.email ?? undefined },
-            data: { postedDiagrams },
+            data: { diagramsPublished },
         });
-        console.log('✅ User posted diagrams updated successfully:', updatedUser);
+        console.log('✅ User diagrams Published successfully:', updatedUser);
         return NextResponse.json(updatedUser, { status: 200 });
     } catch (error: any) {
-        console.log('❌ Error updating user posted diagrams:', error.message);
-        return NextResponse.json({ message: 'An error occurred while updating posted diagrams', error: error.message }, { status: 500 });
+        console.log('❌ Error updating user diagrams:', error.message);
+        return NextResponse.json({ message: 'An error occurred while updating diagramsPublished', error: error.message }, { status: 500 });
     }
 }

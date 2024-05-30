@@ -13,10 +13,10 @@ export default function Discover() {
   const t = useI18n();
 
   useEffect(() => {
-    if (session?.user?.postedDiagrams) {
-      console.log("🔄 Updating posted diagrams from session", session.user.postedDiagrams);
-      const diagrams = Array.isArray(session.user.postedDiagrams) 
-          ? session.user.postedDiagrams 
+    if (session?.user?.diagramsPublished) {
+      console.log("🔄 Updating posted diagrams from session", session.user.diagramsPublished);
+      const diagrams = Array.isArray(session.user.diagramsPublished) 
+          ? session.user.diagramsPublished 
           : [];
       setPostedDiagrams(diagrams);
     }
@@ -41,7 +41,7 @@ export default function Discover() {
       </header>
       <div className="flex flex-col items-center">
         <h1 className="text-3xl font-bold mb-8">Discover</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="flex flex-col space-y-4 w-full">
           {postedDiagrams.map((diagram, index) => (
             <PublishedCard key={index} diagram={diagram} />
           ))}

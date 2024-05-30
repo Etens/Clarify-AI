@@ -9,6 +9,7 @@ declare module 'next-auth' {
             themePreference?: boolean;
             createdAt?: string;
             diagrams?: any[];
+            diagramsPublished?: any[];
         } & DefaultSession['user'];
     }
 
@@ -19,5 +20,6 @@ declare module 'next-auth' {
         themePreference?: boolean;
         createdAt?: string;
         diagrams?: any[];
+        diagramsPublished?: any[];
     }
 }

@@ -62,7 +62,6 @@ export default function Home() {
       if (filteredAndParsedMessages.length > 0) {
         console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
 
-        // 🖋️ Assurez-vous que `userPrompt` est ajouté ici
         const newDiagram = { ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt };
 
         setAllMessagesReceived(filteredAndParsedMessages);
@@ -211,7 +210,6 @@ export default function Home() {
                           setDiagramHistory={setDiagramHistory}
                           index={index}
                         />
-                        <PublishButton diagramIndex={index} />
                       </div>
                     ))}
                   </div>

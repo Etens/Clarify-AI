@@ -35,10 +35,10 @@ export function PublishButton({ diagramIndex }: PublishButtonProps) {
         id: nanoid(), 
       };
 
-      const updatedPostedDiagrams = [...(session.user?.postedDiagrams || []), newDiagram];
+      const updatedDiagramsPublished = [...(session.user?.diagramsPublished || []), newDiagram];
 
       const response = await axios.post('/api/auth/diagrams/publish', {
-        postedDiagrams: updatedPostedDiagrams,
+        diagramsPublished: updatedDiagramsPublished,
       });
 
       if (response.status === 200) {
@@ -50,7 +50,7 @@ export function PublishButton({ diagramIndex }: PublishButtonProps) {
           trigger: "update",
           user: {
             ...session.user,
-            postedDiagrams: updatedUser.postedDiagrams,
+            diagramsPublished: updatedUser.diagramsPublished,
           },
         });
       }

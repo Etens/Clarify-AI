@@ -32,6 +32,9 @@ const ResultView = ({ id, elements, illustrationLinks, userPrompt, onDelete, dia
           {onDelete && diagramHistory && setDiagramHistory !== undefined && index !== undefined && (
             <DeleteButton diagramHistory={diagramHistory} setDiagramHistory={setDiagramHistory} index={index} />
           )}
+          {index !== undefined && (
+            <PublishButton diagramIndex={index} />
+          )}
         </div>
         {userPrompt && (
           <h2 className="text-lg font-semibold mb-4 user-prompt">{userPrompt}</h2>
