@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import { Toaster } from "@/components/alert/toaster";
 import Providers from '@/components/user/providers';
-import I18nProviderWrapper from '@/components/I18nProviderWrapper'; // Import du I18nProviderWrapper
+import I18nProviderWrapper from '@/components/I18nProviderWrapper'; 
 
 export const metadata: Metadata = {
   title: "Clarify",

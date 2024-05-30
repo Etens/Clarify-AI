@@ -26,7 +26,9 @@ const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('🔑 Authorizing user with credentials');
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Email and password are required');
           throw new Error('Email and password are required');
         }
 
@@ -35,14 +37,18 @@ const authOptions: AuthOptions = {
         });
 
         if (user) {
+          console.log('👤 User found:', user.email);
           if (user.password === null) {
+            console.log('❌ User password is null');
             throw new Error('User password is null');
           }
           const isValidPassword = await bcrypt.compare(credentials.password, user.password);
           if (!isValidPassword) {
+            console.log('❌ Invalid password');
             throw new Error('Invalid password');
           }
         } else {
+          console.log('🆕 Creating new user');
           const hashedPassword = await bcrypt.hash(credentials.password, 10);
           user = await prisma.user.create({
             data: {
@@ -53,6 +59,7 @@ const authOptions: AuthOptions = {
           });
         }
 
+        console.log('✅ User authorized:', user.email);
         return { id: user.id, name: user.name, email: user.email, language: user.language ?? "en" };
       }
     })
@@ -64,12 +71,14 @@ const authOptions: AuthOptions = {
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
+      console.log('🔐 JWT callback triggered');
       if (trigger === "update") {
         return { ...token, ...session.user };
       }
       return { ...token, ...user };
     },
     async session({ session, token }) {
+      console.log('📦 Session callback triggered');
       session.user = token as any;
       return session;
     },
@@ -78,5 +87,26 @@ const authOptions: AuthOptions = {
 
 export { authOptions };
 
-export const GET = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
-export const POST = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);
+const checkHeaders = (req: NextApiRequest, res: NextApiResponse) => {
+  console.log('🔍 Checking headers size');
+  if (Object.keys(req.headers).some(header => header.length > 8000)) {
+    console.log('🚫 Header size too large');
+    res.status(431).json({ error: 'Header size too large' });
+    return false;
+  }
+  return true;
+};
+
+export const GET = (req: NextApiRequest, res: NextApiResponse) => {
+  console.log('📥 Incoming GET request');
+  if (!checkHeaders(req, res)) return;
+  console.log('🟢 GET request headers are within acceptable size');
+  return NextAuth(req, res, authOptions);
+};
+
+export const POST = (req: NextApiRequest, res: NextApiResponse) => {
+  console.log('📥 Incoming POST request');
+  if (!checkHeaders(req, res)) return;
+  console.log('🟢 POST request headers are within acceptable size');
+  return NextAuth(req, res, authOptions);
+};

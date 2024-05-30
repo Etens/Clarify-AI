@@ -14,7 +14,7 @@ export default {
   'account.error': 'An error occurred while updating the account.',
   'home.welcome': 'Welcome, {name}, you are now logged in!',
   'home.loading': 'Loading...',
-  'home.loginPrompt': 'Please log in to use the application.',
+  'home.loginPrompt': 'Sign In',
   'home.selectStyle': 'Select Illustration Style:',
   'home.createPrompt': 'Create...',
   'home.history': 'History',

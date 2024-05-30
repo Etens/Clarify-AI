@@ -11,15 +11,9 @@ import ClearAllButton from "../components/button/clear-button";
 import { useSession, signIn } from 'next-auth/react';
 import { ParamsManager } from "@/components/user/params-manager";
 import { useI18n } from '@/locales/client';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/common/select"
+import Link from 'next/link';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/common/select"
+import { PublishButton } from "@/components/button/publish-button";
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
@@ -28,7 +22,6 @@ export default function Home() {
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
   const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
-  const [lastDisplayedDiagram, setLastDisplayedDiagram] = useState<any>(null);
   const { data: session, status, update } = useSession();
   const t = useI18n();
 
@@ -43,8 +36,12 @@ export default function Home() {
       const userMessage = messages.filter((message) => message.role === "user").pop()?.content;
       if (userMessage) {
         setUserPrompt(userMessage);
-        console.log("Prompt saisi par l'utilisateur :", userMessage);
       }
+    }
+  }, [messages, isLoading]);
+
+  useEffect(() => {
+    if (userPrompt) {
       const assistantMessages = messages.filter((message) => message.role === "assistant");
 
       const filteredAndParsedMessages = assistantMessages
@@ -65,14 +62,14 @@ export default function Home() {
       if (filteredAndParsedMessages.length > 0) {
         console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
 
+        // 🖋️ Assurez-vous que `userPrompt` est ajouté ici
         const newDiagram = { ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt };
 
-        setLastDisplayedDiagram(newDiagram);
         setAllMessagesReceived(filteredAndParsedMessages);
         fetchIllustrations(newDiagram, filteredAndParsedMessages);
       }
     }
-  }, [messages, isLoading]);
+  }, [userPrompt]);
 
   const fetchIllustrations = async (newDiagram: any, parsedMessages: any[]) => {
     console.log("Début de fetchIllustrations");
@@ -113,13 +110,11 @@ export default function Home() {
 
     setIllustrationLinks(newIllustrationLinks);
 
-    // Ajoutez le nouveau diagramme à l'historique et sauvegardez-le après avoir récupéré les illustrations
     const updatedDiagram = { ...newDiagram, illustrationLinks: newIllustrationLinks };
     const updatedHistory = [...diagramHistory, updatedDiagram];
     setDiagramHistory(updatedHistory);
     saveDiagrams(updatedHistory);
 
-    // Mettez à jour la session utilisateur
     update({
       ...session,
       trigger: "update",
@@ -148,7 +143,6 @@ export default function Home() {
     setDiagramHistory(updatedHistory);
     saveDiagrams(updatedHistory);
 
-    // Mettez à jour la session utilisateur
     update({
       ...session,
       trigger: "update",
@@ -167,18 +161,27 @@ export default function Home() {
     return <div>{t('home.loading')}</div>;
   }
 
+  const handleStyleChange = (value: string) => {
+    setStyle(value);
+    console.log("Style sélectionné :", value);
+  };
+
   return (
     <main className="min-h-screen text-white">
       <header className="flex justify-end p-4 space-x-4">
         {session ? (
           <>
-            <ParamsManager />
+            <div className="flex items-center justify-center space-x-4">
+              <Link href="/discover">
+                <Button variant="secondary">
+                  Discover
+                </Button>
+              </Link>
+              <ParamsManager />
+            </div>
           </>
         ) : (
-          <Button
-            onClick={() => signIn()}
-            variant="secondary"
-          >
+          <Button onClick={() => signIn()} variant="secondary">
             {t('home.loginPrompt')}
           </Button>
         )}
@@ -208,6 +211,7 @@ export default function Home() {
                           setDiagramHistory={setDiagramHistory}
                           index={index}
                         />
+                        <PublishButton diagramIndex={index} />
                       </div>
                     ))}
                   </div>
@@ -232,7 +236,7 @@ export default function Home() {
                       </Button>
                     </div>
                     <div className="flex items-center justify-center mt-4 space-x-4">
-                      <Select>
+                      <Select onValueChange={handleStyleChange}>
                         <SelectTrigger className="bg-primary p-2 rounded text-white w-24">
                           <SelectValue placeholder="Style" />
                         </SelectTrigger>
@@ -257,7 +261,6 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex items-center justify-center h-screen bg-black">
-          <p className="text-xl font-semibold text-center">{t('home.loginPrompt')}</p>
         </div>
       )}
     </main>

@@ -14,7 +14,7 @@ export default {
     'account.error': 'Произошла ошибка при обновлении аккаунта.',
     'home.welcome': 'Добро пожаловать, {name}, вы вошли в систему!',
     'home.loading': 'Загрузка...',
-    'home.loginPrompt': 'Пожалуйста, войдите, чтобы использовать приложение.',
+    'home.loginPrompt': 'Войти',
     'home.selectStyle': 'Выбрать стиль иллюстрации:',
     'home.createPrompt': 'Создать...',
     'home.history': 'История',

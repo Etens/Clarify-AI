@@ -14,7 +14,7 @@ export default {
     'account.error': 'Si è verificato un errore durante l\'aggiornamento dell\'account.',
     'home.welcome': 'Benvenuto, {name}, hai effettuato l\'accesso!',
     'home.loading': 'Caricamento...',
-    'home.loginPrompt': 'Effettua il login per utilizzare l\'applicazione.',
+    'home.loginPrompt': 'Accedi',
     'home.selectStyle': 'Seleziona stile dell\'illustrazione:',
     'home.createPrompt': 'Crea...',
     'home.history': 'Cronologia',

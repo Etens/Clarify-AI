@@ -14,7 +14,7 @@ export default {
     'account.error': '更新账户时发生错误。',
     'home.welcome': '欢迎，{name}，你已登录！',
     'home.loading': '加载中...',
-    'home.loginPrompt': '请登录以使用应用程序。',
+    'home.loginPrompt': '登录',
     'home.selectStyle': '选择插图风格：',
     'home.createPrompt': '创建...',
     'home.history': '历史记录',

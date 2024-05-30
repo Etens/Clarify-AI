@@ -14,7 +14,7 @@ export default {
     'account.error': 'حدث خطأ أثناء تحديث الحساب.',
     'home.welcome': 'مرحبًا، {name}، لقد تم تسجيل دخولك!',
     'home.loading': 'جارٍ التحميل...',
-    'home.loginPrompt': 'يرجى تسجيل الدخول لاستخدام التطبيق.',
+    'home.loginPrompt': 'تسجيل الدخول',
     'home.selectStyle': 'اختر نمط الرسم التوضيحي:',
     'home.createPrompt': 'إنشاء...',
     'home.history': 'التاريخ',

@@ -14,7 +14,7 @@ export default {
     'account.error': 'アカウントの更新中にエラーが発生しました。',
     'home.welcome': 'ようこそ、{name}さん。ログインしました！',
     'home.loading': '読み込み中...',
-    'home.loginPrompt': 'アプリケーションを使用するにはログインしてください。',
+    'home.loginPrompt': 'サインイン',
     'home.selectStyle': 'イラストスタイルを選択:',
     'home.createPrompt': '作成...',
     'home.history': '履歴',

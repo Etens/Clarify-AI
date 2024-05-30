@@ -14,7 +14,7 @@ export default {
     'account.error': 'Ocorreu um erro ao atualizar a conta.',
     'home.welcome': 'Bem-vindo, {name}, você está logado!',
     'home.loading': 'Carregando...',
-    'home.loginPrompt': 'Por favor, faça login para usar a aplicação.',
+    'home.loginPrompt': 'Entrar',
     'home.selectStyle': 'Selecionar estilo de ilustração:',
     'home.createPrompt': 'Criar...',
     'home.history': 'Histórico',

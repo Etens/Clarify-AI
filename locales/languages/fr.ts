@@ -14,7 +14,7 @@ export default {
     'account.error': 'Une erreur s\'est produite lors de la mise à jour du compte.',
     'home.welcome': 'Bienvenue, {name}, vous êtes maintenant connecté!',
     'home.loading': 'Chargement...',
-    'home.loginPrompt': 'Veuillez vous connecter pour utiliser l\'application.',
+    'home.loginPrompt': 'Se Connecter',
     'home.selectStyle': 'Sélectionner le style d\'illustration :',
     'home.createPrompt': 'Créer...',
     'home.history': 'Historique',

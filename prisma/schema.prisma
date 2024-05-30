@@ -17,10 +17,24 @@ model User {
   language       String?  @default("en")
   createdAt      DateTime @default(now())
   themePreference Boolean  @default(false)
-  diagrams       Json?    
+  diagrams       Diagram[] @relation("UserDiagrams")
   accounts       Account[]
   sessions       Session[]
   password       String?
+}
+
+model Diagram {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  elements          Json
+  userPrompt        String
+  illustrationLinks Json
+  createdAt         DateTime @default(now())
+  userId            String   @db.ObjectId
+  user              User     @relation(fields: [userId], references: [id], name: "UserDiagrams")
+  published         Boolean  @default(false) 
+  views             Int      @default(0)     
+  userImage         String   
 }
 
 model Account {

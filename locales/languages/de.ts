@@ -14,7 +14,7 @@ export default {
     'account.error': 'Beim Aktualisieren des Kontos ist ein Fehler aufgetreten.',
     'home.welcome': 'Willkommen, {name}, du bist jetzt eingeloggt!',
     'home.loading': 'Lädt...',
-    'home.loginPrompt': 'Bitte logge dich ein, um die Anwendung zu nutzen.',
+    'home.loginPrompt': 'Anmelden',
     'home.selectStyle': 'Illustrationsstil auswählen:',
     'home.createPrompt': 'Erstellen...',
     'home.history': 'Verlauf',

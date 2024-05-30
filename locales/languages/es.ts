@@ -14,7 +14,7 @@ export default {
     'account.error': 'Ocurrió un error al actualizar la cuenta.',
     'home.welcome': '¡Bienvenido, {name}, has iniciado sesión!',
     'home.loading': 'Cargando...',
-    'home.loginPrompt': 'Por favor, inicia sesión para usar la aplicación.',
+    'home.loginPrompt': 'Iniciar Sesión',
     'home.selectStyle': 'Seleccionar estilo de ilustración:',
     'home.createPrompt': 'Crear...',
     'home.history': 'Historial',

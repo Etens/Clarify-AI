@@ -1,6 +1,7 @@
 import { CopyButton } from '../button/copy-button';
 import { DownloadButton } from '../button/download-button';
 import DeleteButton from '../button/delete-button';
+import { PublishButton } from '../button/publish-button';
 
 interface ElementData {
   ElementName: string;

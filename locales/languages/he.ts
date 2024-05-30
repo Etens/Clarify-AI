@@ -14,7 +14,7 @@ export default {
     'account.error': 'אירעה שגיאה בעת עדכון החשבון.',
     'home.welcome': 'ברוך הבא, {name}, אתה מחובר!',
     'home.loading': 'טוען...',
-    'home.loginPrompt': 'אנא התחבר כדי להשתמש ביישום.',
+    'home.loginPrompt': 'התחבר',
     'home.selectStyle': 'בחר סגנון איור:',
     'home.createPrompt': 'צור...',
     'home.history': 'היסטוריה',
