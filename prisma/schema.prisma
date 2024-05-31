@@ -23,6 +23,7 @@ model User {
   diagrams        Diagram[] @relation("UserDiagrams")
   views           View[]    @relation("UserViews")
   likes           Like[]    @relation("UserLikes")
+  comments        Comment[] @relation("UserComments")
 }
 
 model Diagram {
@@ -34,8 +35,20 @@ model Diagram {
   likes       Int      @default(0)
   views       Int      @default(0)
   createdAt   DateTime @default(now())
+  tags        String[]
+  comments    Comment[] @relation("DiagramComments")
   userViews   View[]   @relation("DiagramViews")
   userLikes   Like[]   @relation("DiagramLikes")
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  diagramId String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], name: "UserComments")
+  diagram   Diagram  @relation(fields: [diagramId], references: [id], name: "DiagramComments")
+  content   String
+  createdAt DateTime @default(now())
 }
 
 model View {

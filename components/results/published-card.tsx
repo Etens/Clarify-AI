@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/results/card';
 import { CopyButton } from '../button/copy-button';
 import { DownloadButton } from '../button/download-button';
 import LikeButton from '../button/like-button';
+import CommentForm from '../button/comment-button';
 import { Eye } from 'lucide-react';
 import axios from 'axios';
 import { Button } from '../button/button';
+import { formatDistanceToNow } from 'date-fns';
 
 interface PublishedCardProps {
   diagram: any;
@@ -13,6 +15,7 @@ interface PublishedCardProps {
 
 const PublishedCard = ({ diagram }: PublishedCardProps) => {
   console.log("🔍 Diagram data in PublishedCard:", diagram);
+  const [comments, setComments] = useState([]);
 
   const userInitial = diagram.user.name ? diagram.user.name.charAt(0) : '?';
 
@@ -27,8 +30,35 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
       }
     };
 
+    const fetchComments = async () => {
+      try {
+        console.log('💬 Fetching comments for diagram with ID:', diagram.id);
+        const response = await axios.get(`/api/diagrams/comments?id=${diagram.id}`);
+        setComments(response.data);
+        console.log('✅ Comments fetched successfully');
+      } catch (error) {
+        console.error('❌ Error fetching comments:', error);
+      }
+    };
+
     incrementViews();
+    fetchComments();
   }, [diagram.id]);
+
+  const handleCommentAdded = () => {
+    const fetchComments = async () => {
+      try {
+        console.log('💬 Fetching comments for diagram with ID:', diagram.id);
+        const response = await axios.get(`/api/diagrams/comments?id=${diagram.id}`);
+        setComments(response.data);
+        console.log('✅ Comments fetched successfully');
+      } catch (error) {
+        console.error('❌ Error fetching comments:', error);
+      }
+    };
+
+    fetchComments();
+  };
 
   return (
     <Card className="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg w-full scale-75">
@@ -45,12 +75,26 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
             <h1 className='text-lg font-semibold text-white'>{diagram.user.name || 'Unknown User'}</h1>
           </div>
           <div className="flex flex-col w-3/4 justify-center items-start h-full space-y-4">
-            <h1 className="text-xl font-semibold text-white">
-              {diagram.content.title}
-            </h1>
-            <p className="text-sm text-white font-light w-3/4">
-              {diagram.content.userPrompt}
-            </p>
+            <div className="flex flex-wrap">
+              {diagram.content.tags && (
+                <div className="flex flex-col">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-white bg-blue-500 px-2 py-1 rounded-lg">
+                      {diagram.content.tags.general}
+                    </span>
+                    <span className="text-xs text-white bg-purple-500 px-2 py-1 rounded-lg">
+                      {diagram.content.tags.specific}
+                    </span>
+                  </div>
+                  <h1 className="font-semibold text-white mt-4 text-2xl mb-2 bg-black p-2 rounded-lg">
+                    {diagram.content.title}
+                  </h1>
+                  <p className="text-sm text-white font-light">
+                    {diagram.content.userPrompt}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -88,7 +132,35 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
           <DownloadButton targetId={`published-diagram-${diagram.userPrompt}`} fileName={diagram.userPrompt || 'diagram'} />
         </div>
       </CardFooter>
-    </Card>
+
+      <div className="w-full p-4">
+        <h3 className="text-lg font-semibold">Comments</h3>
+        <div className="space-y-2">
+          {comments.map((comment: any, index: number) => (
+            <div key={index} className="p-2 border rounded-lg flex items-start space-x-2">
+              {comment.user.image ? (
+                <img src={comment.user.image} alt={comment.user.name || 'Unknown'} className="w-8 h-8 rounded-full" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-xs text-gray-500">{comment.user.name ? comment.user.name.charAt(0) : '?'}</span>
+                </div>
+              )}
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h4 className="text-md font-semibold">{comment.user.name || 'Unknown User'}</h4>
+                  <p className="text-xs text-gray-500">
+                    {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                  </p>
+                  <p className="text-xs text-gray-400"></p>
+                </div>
+                <p className="text-sm text-gray-800">{comment.content}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <CommentForm diagramID={diagram.id} onCommentAdded={handleCommentAdded} />
+      </div>
+    </Card >
   );
 };
 

@@ -1,5 +1,3 @@
-// pages/api/diagrams.ts
-
 import { getServerSession } from 'next-auth/next';
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';

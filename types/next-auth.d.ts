@@ -34,6 +34,17 @@ declare module 'next-auth' {
     illustrationLinks: { [key: string]: string };
     user: User;
     likes: number;
+    views: number;
+    tags: string[];
+    comments: Comment[];
   }
-  
+
+  interface Comment {
+    id: string;
+    userId: string;
+    diagramId: string;
+    user: User;
+    content: string;
+    createdAt: string;
+  }
 }

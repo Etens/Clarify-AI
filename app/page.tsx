@@ -121,7 +121,7 @@ export default function Home() {
     const updatedDiagram = { ...newDiagram, illustrationLinks: newIllustrationLinks };
     const updatedHistory = [...diagrams, updatedDiagram];
     setDiagrams(updatedHistory);
-    saveDiagram(updatedDiagram); // Change this to save only the new diagram
+    saveDiagram(updatedDiagram);
   };
 
   const saveDiagram = async (diagram: any) => {
@@ -130,7 +130,6 @@ export default function Home() {
       const response = await axios.post(url);
       if (response.status === 200) {
         console.log("Diagram saved successfully", response.data);
-        // Update the diagram with the new ID from the server
         setDiagrams(prevDiagrams => prevDiagrams.map(d => d === diagram ? { ...diagram, id: response.data.id } : d));
       } else {
         console.error("Failed to save diagram");

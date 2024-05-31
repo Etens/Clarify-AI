@@ -7,6 +7,7 @@ import { ParamsManager } from '@/components/user/params-manager';
 import { Button } from "../../components/button/button";
 import { useI18n } from '@/locales/client';
 import axios from 'axios';
+import { Diagram } from 'next-auth';
 
 export default function Discover() {
   const { data: session, status } = useSession();

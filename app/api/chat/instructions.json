@@ -5,6 +5,10 @@
     "type": "JSON",
     "data": {
       "title": "Diagram Title Based on User Input",
+      "tags": {
+        "general": "General category of the diagram",
+        "specific": "Specific topic of the diagram"
+      },
       "elements": [
         {
           "ElementName": "Provide the name of the element.",
@@ -24,6 +28,10 @@
       "ia_response": {
         "data": {
           "title": "Key Components of Mobile Marketing",
+          "tags": {
+            "general": "Technology",
+            "specific": "Mobile Marketing"
+          },
           "elements": [
             {
               "ElementName": "Mobile Apps",

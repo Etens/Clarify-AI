@@ -19,6 +19,10 @@ interface IAExample {
         Keywords: string;
         Explanation: string;
       }>;
+      tags: {
+        general: string;
+        specific: string;
+      };
     };
   };
 }
@@ -35,6 +39,10 @@ interface IAInstructionsData {
         Keywords: string;
         Explanation: string;
       }>;
+      tags: {
+        general: string;
+        specific: string;
+      };
     };
   };
   language_style: {
@@ -56,6 +64,7 @@ const instructionMessage = {
     `Elements - ${aiInstructionsData.response_format.data.elements.map(element => 
       `ElementName: ${element.ElementName}, Keywords: ${element.Keywords}, Explanation: ${element.Explanation}`
     ).join(", ")}\n` +
+    `Tags: General - ${aiInstructionsData.response_format.data.tags.general}, Specific - ${aiInstructionsData.response_format.data.tags.specific}\n` +
     `Language Style: Tone - ${aiInstructionsData.language_style.tone}, Complexity - ${aiInstructionsData.language_style.complexity}\n` +
     `Examples of Prompt: ${aiInstructionsData.examples.map(example => `User Prompt: ${example.user_prompt}, Response: ${JSON.stringify(example.ia_response.data)}`).join(", ")}\n` +
     `Best Practices: ${aiInstructionsData.best_practices.join(", ")}\n` +
@@ -74,14 +83,14 @@ export async function POST(req: NextRequest) {
 
   const languageInstruction = {
     role: "system",
-    content: `Please respond in ${language} for all parts of the response, except for keywords which should remain in English. Ensure that the text generated for each element is in ${language} and the keywords are in English.`
+    content: `Please respond in ${language} for all parts of the response, except for keywords and tags which should remain in English. Ensure that the text generated for each element is in ${language} and the keywords and tags are in English.`
   };
 
   const messagesWithInstructions = [...messages, instructionMessage, languageInstruction];
   console.log("Messages with instructions: ", messagesWithInstructions);
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-4',
     stream: true,
     messages: messagesWithInstructions,
   });

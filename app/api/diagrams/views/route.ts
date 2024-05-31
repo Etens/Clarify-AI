@@ -1,5 +1,3 @@
-// pages/api/diagrams/views.ts
-
 import { getServerSession } from 'next-auth/next';
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
@@ -41,7 +39,7 @@ export async function PATCH(req: NextRequest) {
     console.log('👀 Incrementing views for diagram with ID:', id);
     await prisma.view.create({
       data: {
-        userId: userId!, // Assert that userId is not undefined
+        userId: userId!, 
         diagramId: id,
       },
     });
