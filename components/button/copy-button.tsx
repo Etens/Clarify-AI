@@ -16,7 +16,7 @@ export function CopyButton({ targetId }: { targetId: string }) {
       const promptElement = element.querySelector('.user-prompt') as HTMLElement;
       if (promptElement) promptElement.style.display = 'none';
 
-      const buttonElements = element.querySelectorAll('.copy-button, .download-button, .delete-button') as NodeListOf<HTMLElement>;
+      const buttonElements = element.querySelectorAll('.copy-button, .download-button, .delete-button, .publish-button') as NodeListOf<HTMLElement>;
       buttonElements.forEach(button => button.style.display = 'none');
 
       element.style.backgroundColor = 'white';
@@ -30,7 +30,7 @@ export function CopyButton({ targetId }: { targetId: string }) {
           }
 
           if (promptElement) promptElement.style.display = 'block';
-          buttonElements.forEach(button => button.style.display = 'block');
+          buttonElements.forEach(button => button.style.display = 'flex');
 
           element.style.cssText = originalStyle;
         })
@@ -38,7 +38,7 @@ export function CopyButton({ targetId }: { targetId: string }) {
           console.error('Erreur lors de la génération du blob:', error);
 
           if (promptElement) promptElement.style.display = 'block';
-          buttonElements.forEach(button => button.style.display = 'block');
+          buttonElements.forEach(button => button.style.display = 'flex');
 
           element.style.cssText = originalStyle;
         });
@@ -46,7 +46,7 @@ export function CopyButton({ targetId }: { targetId: string }) {
   };
 
   return (
-    <Button variant="default" size="icon" onClick={handleCopy} className="copy-button hover:bg-black-500">
+    <Button variant="default" size="icon" onClick={handleCopy} className="copy-button button-icon hover:bg-black-500">
       <Copy className="h-4 w-4 text-white" />
     </Button>
   );

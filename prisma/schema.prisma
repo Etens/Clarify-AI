@@ -8,20 +8,53 @@ datasource db {
 }
 
 model User {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  name             String?
-  email            String   @unique
-  image            String?
-  profileImage     String?
-  emailVerified    DateTime?
-  language         String?  @default("en")
-  createdAt        DateTime @default(now())
-  themePreference  Boolean  @default(false)
-  diagrams         Json     @default("[]")
-  diagramsPublished Json    @default("[]")
-  accounts         Account[]
-  sessions         Session[]
-  password         String?
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String    @unique
+  image           String?
+  profileImage    String?
+  emailVerified   DateTime?
+  language        String?   @default("en")
+  createdAt       DateTime  @default(now())
+  themePreference Boolean   @default(false)
+  accounts        Account[]
+  sessions        Session[]
+  password        String?
+  diagrams        Diagram[] @relation("UserDiagrams")
+  views           View[]    @relation("UserViews")
+  likes           Like[]    @relation("UserLikes")
+}
+
+model Diagram {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], name: "UserDiagrams")
+  content     Json
+  isPublished Boolean  @default(false)
+  likes       Int      @default(0)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  userViews   View[]   @relation("DiagramViews")
+  userLikes   Like[]   @relation("DiagramLikes")
+}
+
+model View {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  diagramId String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], name: "UserViews")
+  diagram   Diagram  @relation(fields: [diagramId], references: [id], name: "DiagramViews")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, diagramId], name: "user_diagram_unique")
+}
+
+model Like {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String  @db.ObjectId
+  diagramId String  @db.ObjectId
+  user      User    @relation(fields: [userId], references: [id], name: "UserLikes")
+  diagram   Diagram @relation(fields: [diagramId], references: [id], name: "DiagramLikes")
 }
 
 model Account {

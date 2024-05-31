@@ -1,4 +1,4 @@
-import { CircleArrowDown } from 'lucide-react';
+import { FileDown } from 'lucide-react';
 import * as htmlToImage from 'html-to-image';
 import { Button } from "./button";
 
@@ -21,7 +21,7 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
       const promptElement = element.querySelector('.user-prompt') as HTMLElement;
       if (promptElement) promptElement.style.display = 'none';
 
-      const buttonElements = element.querySelectorAll('.copy-button, .download-button, .delete-button') as NodeListOf<HTMLElement>;
+      const buttonElements = element.querySelectorAll('.copy-button, .download-button, .delete-button, .publish-button') as NodeListOf<HTMLElement>;
       buttonElements.forEach(button => button.style.display = 'none');
 
       element.style.backgroundColor = 'white';
@@ -39,7 +39,7 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
           }
 
           if (promptElement) promptElement.style.display = 'block';
-          buttonElements.forEach(button => button.style.display = 'block');
+          buttonElements.forEach(button => button.style.display = 'flex');
 
           element.style.cssText = originalStyle;
         })
@@ -47,7 +47,7 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
           console.error('Erreur lors de la génération du blob:', error);
 
           if (promptElement) promptElement.style.display = 'block';
-          buttonElements.forEach(button => button.style.display = 'block');
+          buttonElements.forEach(button => button.style.display = 'flex');
 
           element.style.cssText = originalStyle;
         });
@@ -55,8 +55,8 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
   };
 
   return (
-    <Button variant="default" size="icon" onClick={handleDownload} className="download-button hover:bg-black-500">
-      <CircleArrowDown className="h-4 w-4 text-white" />
+    <Button variant="default" size="icon" onClick={handleDownload} className="download-button button-icon hover:bg-black-500">
+      <FileDown className="h-4 w-4 text-white" />
     </Button>
   );
 }

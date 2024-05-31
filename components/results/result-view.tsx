@@ -15,26 +15,20 @@ interface ResultViewProps {
   elements: ElementData[];
   illustrationLinks: { [key: string]: string };
   userPrompt?: string;
-  onDelete?: () => void;
-  onCopy?: () => void;
-  diagramHistory?: any[];
-  setDiagramHistory?: (history: any[]) => void;
+  diagrams?: any[];
+  setDiagrams?: (history: any[]) => void;
   index?: number;
 }
 
-const ResultView = ({ id, elements, illustrationLinks, userPrompt, onDelete, diagramHistory, setDiagramHistory, index }: ResultViewProps) => {
+const ResultView = ({ id, elements, illustrationLinks, userPrompt }: ResultViewProps) => {
   return (
     <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg relative scale-75">
       <div id={id} className='w-full p-4 rounded-lg'>
         <div className="flex justify-end absolute top-2 right-2 space-x-2">
           <CopyButton targetId={id} />
           <DownloadButton targetId={id} fileName={userPrompt || 'diagram'} />
-          {onDelete && diagramHistory && setDiagramHistory !== undefined && index !== undefined && (
-            <DeleteButton diagramHistory={diagramHistory} setDiagramHistory={setDiagramHistory} index={index} />
-          )}
-          {index !== undefined && (
-            <PublishButton diagramIndex={index} />
-          )}
+          <DeleteButton diagramID={id} />
+          <PublishButton diagramID={id} />
         </div>
         {userPrompt && (
           <h2 className="text-lg font-semibold mb-4 user-prompt">{userPrompt}</h2>

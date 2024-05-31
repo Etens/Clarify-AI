@@ -1,48 +1,30 @@
 import { Button } from "./button";
-import { Trash2 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { Trash } from 'lucide-react';
 import axios from 'axios';
 
-interface ClearAllButtonProps {
-  setDiagramHistory: (history: any[]) => void;
+interface ClearButtonProps {
+  setDiagrams: (diagrams: any[]) => void;
 }
 
-export function ClearAllButton({ setDiagramHistory }: ClearAllButtonProps) {
-  const { data: session, update } = useSession();
-
-  const handleClearHistory = async () => {
-    if (confirm("Are you sure you want to delete all diagrams from the history?")) {
-      setDiagramHistory([]);
-      await saveDiagrams([]);
-      update({
-        ...session,
-        trigger: "update",
-        user: {
-          ...(session?.user ?? {}),
-          diagrams: [],
-        },
-      });
-    }
-  };
-
-  const saveDiagrams = async (diagrams: any[]) => {
-    try {
-      const response = await axios.post('/api/auth/diagrams', { diagrams });
-      if (response.status === 200) {
-        console.log("Diagrams cleared successfully");
-      } else {
-        console.error("Failed to clear diagrams");
+export function ClearButton({ setDiagrams }: ClearButtonProps) {
+  const handleClearDiagrams = async () => {
+    if (confirm("Are you sure you want to delete all diagrams? This action cannot be undone.")) {
+      try {
+        console.log("Clearing all diagrams");
+        await axios.delete('/api/diagrams');
+        setDiagrams([]);
+        console.log("All diagrams deleted successfully");
+      } catch (error) {
+        console.error('An error occurred while deleting all diagrams:', error);
       }
-    } catch (error) {
-      console.error('An error occurred while clearing diagrams:', error);
     }
   };
 
   return (
-    <Button variant="destructive" size="icon" onClick={handleClearHistory} className="hover:bg-red-900">
-      <Trash2 className="h-4 w-10 text-white" />
+    <Button variant="default" size="icon" onClick={handleClearDiagrams} className="clear-button hover:bg-red-500">
+      <Trash className="h-4 w-4 text-white" />
     </Button>
   );
 }
 
-export default ClearAllButton;
+export default ClearButton;

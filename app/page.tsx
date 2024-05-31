@@ -2,33 +2,45 @@
 
 import React, { useState, useEffect } from "react";
 import { useChat } from "ai/react";
-import axios from "axios";
-import ResultView from "../components/results/result-view";
-import { Input } from "../components/common/searchbar";
-import { Button } from "../components/button/button";
-import { Progress } from "@/components/common/loader";
-import ClearAllButton from "../components/button/clear-button";
 import { useSession, signIn } from 'next-auth/react';
+import axios from "axios";
+import Link from 'next/link';
+import ResultView from "@/components/results/result-view";
+import ClearButton from "@/components/button/clear-button";
+import { Input } from "@/components/common/searchbar";
+import { Button } from "@/components/button/button";
+import { Progress } from "@/components/common/loader";
 import { ParamsManager } from "@/components/user/params-manager";
 import { useI18n } from '@/locales/client';
-import Link from 'next/link';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/common/select"
-import { PublishButton } from "@/components/button/publish-button";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/common/select";
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
-  const [allMessagesReceived, setAllMessagesReceived] = useState<any[]>([]);
-  const [illustrationLinks, setIllustrationLinks] = useState({});
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
-  const [diagramHistory, setDiagramHistory] = useState<any[]>([]);
-  const { data: session, status, update } = useSession();
+  const [diagrams, setDiagrams] = useState<any[]>([]);
+  const { data: session, status } = useSession();
   const t = useI18n();
 
   useEffect(() => {
-    if (session?.user?.diagrams) {
-      setDiagramHistory(session.user.diagrams);
-    }
+    const fetchDiagrams = async () => {
+      if (session) {
+        try {
+          const response = await axios.get('/api/diagrams', {
+            params: { email: session.user?.email }
+          });
+          const filteredDiagrams = response.data.map((diagram: any) => ({ ...diagram.content, id: diagram.id }));
+          setDiagrams(filteredDiagrams);
+          console.log("Diagrams fetched successfully", filteredDiagrams);
+        } catch (error) {
+          console.error("Error fetching diagrams:", error);
+        }
+      } else {
+        console.log("No session found");
+      }
+    };
+
+    fetchDiagrams();
   }, [session]);
 
   useEffect(() => {
@@ -64,7 +76,6 @@ export default function Home() {
 
         const newDiagram = { ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt };
 
-        setAllMessagesReceived(filteredAndParsedMessages);
         fetchIllustrations(newDiagram, filteredAndParsedMessages);
       }
     }
@@ -107,54 +118,27 @@ export default function Home() {
       return acc;
     }, {});
 
-    setIllustrationLinks(newIllustrationLinks);
-
     const updatedDiagram = { ...newDiagram, illustrationLinks: newIllustrationLinks };
-    const updatedHistory = [...diagramHistory, updatedDiagram];
-    setDiagramHistory(updatedHistory);
-    saveDiagrams(updatedHistory);
-
-    update({
-      ...session,
-      trigger: "update",
-      user: {
-        ...(session?.user ?? {}),
-        diagrams: updatedHistory,
-      },
-    });
+    const updatedHistory = [...diagrams, updatedDiagram];
+    setDiagrams(updatedHistory);
+    saveDiagram(updatedDiagram); // Change this to save only the new diagram
   };
 
-  const saveDiagrams = async (diagrams: any[]) => {
+  const saveDiagram = async (diagram: any) => {
     try {
-      const response = await axios.post('/api/auth/diagrams', { diagrams });
+      const url = `/api/diagrams?content=${encodeURIComponent(JSON.stringify(diagram))}&isPublished=${diagram.isPublished}`;
+      const response = await axios.post(url);
       if (response.status === 200) {
-        console.log("Diagrams saved successfully");
+        console.log("Diagram saved successfully", response.data);
+        // Update the diagram with the new ID from the server
+        setDiagrams(prevDiagrams => prevDiagrams.map(d => d === diagram ? { ...diagram, id: response.data.id } : d));
       } else {
-        console.error("Failed to save diagrams");
+        console.error("Failed to save diagram");
       }
     } catch (error) {
-      console.error('An error occurred while saving diagrams:', error);
+      console.error('An error occurred while saving diagram:', error);
     }
   };
-
-  function handleDeleteDiagram(index: number): void {
-    const updatedHistory = diagramHistory.filter((_, i) => i !== index);
-    setDiagramHistory(updatedHistory);
-    saveDiagrams(updatedHistory);
-
-    update({
-      ...session,
-      trigger: "update",
-      user: {
-        ...(session?.user ?? {}),
-        diagrams: updatedHistory,
-      },
-    });
-  }
-
-  useEffect(() => {
-    console.log("Session updated:", session);
-  }, [session]);
 
   if (status === "loading") {
     return <div>{t('home.loading')}</div>;
@@ -197,17 +181,15 @@ export default function Home() {
               <section className="flex flex-col items-center justify-center w-full p-0">
                 <div className="flex items-center">
                   <div className="flex overflow-x-auto">
-                    {diagramHistory.map((diagram, index) => (
+                    {diagrams.map((diagram, index) => (
                       <div key={index} className="relative transform w-full scale-[0.8]">
                         <ResultView
-                          id={`diagram-${index}`}
+                          id={diagram.id}
                           userPrompt={diagram.userPrompt}
                           elements={diagram.elements || []}
                           illustrationLinks={diagram.illustrationLinks}
-                          onCopy={() => console.log(t('home.copyDiagram'), index)}
-                          onDelete={() => handleDeleteDiagram(index)}
-                          diagramHistory={diagramHistory}
-                          setDiagramHistory={setDiagramHistory}
+                          diagrams={diagrams}
+                          setDiagrams={setDiagrams}
                           index={index}
                         />
                       </div>
@@ -217,15 +199,6 @@ export default function Home() {
               </section>
               <section className="flex items-center w-full flex-col mb-32 lg:justify-center">
                 <div className="flex flex-col items-center w-full">
-                  {allMessagesReceived.length > 0 && (
-                    <ResultView
-                      id="main-diagram"
-                      userPrompt={userPrompt}
-                      elements={allMessagesReceived[allMessagesReceived.length - 1]?.elements || []}
-                      illustrationLinks={illustrationLinks}
-                      onCopy={() => console.log(t('home.copyDiagram'))}
-                    />
-                  )}
                   <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
                     <div className="flex items-center justify-center w-full space-x-4">
                       <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} className="w-96" />
@@ -249,7 +222,7 @@ export default function Home() {
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      <ClearAllButton setDiagramHistory={setDiagramHistory} />
+                      <ClearButton setDiagrams={setDiagrams} />
                     </div>
                   </form>
                 </div>
