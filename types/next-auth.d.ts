@@ -27,6 +27,8 @@ declare module 'next-auth' {
   }
   
   interface Diagram {
+    createdAt: string | number | Date;
+    content: any;
     id: string;
     title: string;
     userPrompt: string;

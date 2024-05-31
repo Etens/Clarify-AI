@@ -22,6 +22,7 @@ interface IAExample {
       tags: {
         general: string;
         specific: string;
+        icon: string;
       };
     };
   };
@@ -42,6 +43,7 @@ interface IAInstructionsData {
       tags: {
         general: string;
         specific: string;
+        icon: string;
       };
     };
   };
@@ -61,10 +63,10 @@ const instructionMessage = {
   content: `Role: ${aiInstructionsData.role}\n` +
     `Description: ${aiInstructionsData.description}\n` +
     `Objective of the response: Type - ${aiInstructionsData.response_format.type}, Title - ${aiInstructionsData.response_format.data.title}, ` +
-    `Elements - ${aiInstructionsData.response_format.data.elements.map(element => 
+    `Elements - ${aiInstructionsData.response_format.data.elements.map(element =>
       `ElementName: ${element.ElementName}, Keywords: ${element.Keywords}, Explanation: ${element.Explanation}`
     ).join(", ")}\n` +
-    `Tags: General - ${aiInstructionsData.response_format.data.tags.general}, Specific - ${aiInstructionsData.response_format.data.tags.specific}\n` +
+    `Tags: General - ${aiInstructionsData.response_format.data.tags.general}, Specific - ${aiInstructionsData.response_format.data.tags.specific}, Icon - ${aiInstructionsData.response_format.data.tags.icon}\n` +
     `Language Style: Tone - ${aiInstructionsData.language_style.tone}, Complexity - ${aiInstructionsData.language_style.complexity}\n` +
     `Examples of Prompt: ${aiInstructionsData.examples.map(example => `User Prompt: ${example.user_prompt}, Response: ${JSON.stringify(example.ia_response.data)}`).join(", ")}\n` +
     `Best Practices: ${aiInstructionsData.best_practices.join(", ")}\n` +
@@ -90,7 +92,7 @@ export async function POST(req: NextRequest) {
   console.log("Messages with instructions: ", messagesWithInstructions);
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4',
+    model: 'gpt-4o',
     stream: true,
     messages: messagesWithInstructions,
   });

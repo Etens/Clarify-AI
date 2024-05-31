@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useParams } from 'next/navigation'; // Utilisez useParams pour accéder aux paramètres
 import { signIn, useSession } from 'next-auth/react';
 import PublishedCard from '@/components/results/published-card';
 import { ParamsManager } from '@/components/user/params-manager';
@@ -9,22 +9,13 @@ import { Button } from "@/components/button/button";
 import { useI18n } from '@/locales/client';
 import axios from 'axios';
 import { Diagram } from 'next-auth';
-import { LucideIcon, Tag } from 'lucide-react'; 
 
-export default function Discover() {
+export default function DiscoverSubcategory() {
   const { data: session, status } = useSession();
+  const { category, subcategory } = useParams(); // Utilisez useParams ici
   const [postedDiagrams, setPostedDiagrams] = useState<Diagram[]>([]);
-  const [categories, setCategories] = useState<{ [key: string]: { icon: string } }>({});
+  const [filteredDiagrams, setFilteredDiagrams] = useState<Diagram[]>([]);
   const t = useI18n();
-
-  const loadLucideIcon = (iconName: string): LucideIcon | null => {
-    try {
-      const { [iconName]: Icon } = require('lucide-react');
-      return Icon;
-    } catch {
-      return null;
-    }
-  };
 
   useEffect(() => {
     const fetchPostedDiagrams = async () => {
@@ -36,7 +27,6 @@ export default function Discover() {
           const likesResponse = await axios.get(`/api/diagrams/like?id=${diagram.id}`);
           return { ...diagram, likes: likesResponse.data.likes };
         }));
-        diagramsWithLikes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setPostedDiagrams(diagramsWithLikes);
       } catch (error) {
         console.error("❌ Error fetching posted diagrams:", error);
@@ -47,21 +37,18 @@ export default function Discover() {
   }, []);
 
   useEffect(() => {
-    if (postedDiagrams.length > 0) {
-      const categories: { [key: string]: { icon: string } } = {};
+    if (category && postedDiagrams.length > 0) {
+      const decodedCategory = decodeURIComponent(category as string);
+      const decodedSubcategory = subcategory ? decodeURIComponent(subcategory as string) : null;
 
-      postedDiagrams.forEach((diagram) => {
-        const generalTag = diagram.content.tags?.general || "Uncategorized";
-        const icon = diagram.content.tags?.icon || "Tag";
-
-        if (!categories[generalTag]) {
-          categories[generalTag] = { icon };
-        }
+      const filtered = postedDiagrams.filter(diagram => {
+        const generalTag = diagram.content.tags?.general?.toLowerCase() === decodedCategory.toLowerCase();
+        const specificTag = decodedSubcategory ? diagram.content.tags?.specific?.toLowerCase() === decodedSubcategory.toLowerCase() : true;
+        return generalTag && specificTag;
       });
-
-      setCategories(categories);
+      setFilteredDiagrams(filtered);
     }
-  }, [postedDiagrams]);
+  }, [category, subcategory, postedDiagrams]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -81,22 +68,9 @@ export default function Discover() {
         )}
       </header>
       <div className="flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-8">Discover</h1>
-        <div className="flex flex-wrap justify-center space-x-4 mb-8">
-          {Object.keys(categories).map((generalTag) => {
-            const Icon = loadLucideIcon(categories[generalTag].icon);
-            return (
-              <Link key={generalTag} href={`/discover/${encodeURIComponent(generalTag)}`}>
-                <Button variant="secondary" className="flex items-center space-x-2">
-                  {Icon ? <Icon className="h-5 w-5" /> : <Tag className="h-5 w-5" />}
-                  <span>{generalTag}</span>
-                </Button>
-              </Link>
-            );
-          })}
-        </div>
+        <h1 className="text-3xl font-bold mb-8">Discover {decodeURIComponent(category as string)} {subcategory && `> ${decodeURIComponent(subcategory as string)}`}</h1>
         <div className="flex flex-col space-y-4 w-full">
-          {postedDiagrams.map((diagram, index) => (
+          {filteredDiagrams.map((diagram, index) => (
             <PublishedCard key={index} diagram={diagram} />
           ))}
         </div>

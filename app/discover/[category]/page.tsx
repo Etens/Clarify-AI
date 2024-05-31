@@ -1,30 +1,23 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import PublishedCard from '@/components/results/published-card';
 import { ParamsManager } from '@/components/user/params-manager';
 import { Button } from "@/components/button/button";
 import { useI18n } from '@/locales/client';
 import axios from 'axios';
+import Link from 'next/link';
 import { Diagram } from 'next-auth';
-import { LucideIcon, Tag } from 'lucide-react'; 
+import { Tag } from 'lucide-react';
 
-export default function Discover() {
+export default function DiscoverCategory() {
   const { data: session, status } = useSession();
+  const { category } = useParams();
   const [postedDiagrams, setPostedDiagrams] = useState<Diagram[]>([]);
-  const [categories, setCategories] = useState<{ [key: string]: { icon: string } }>({});
+  const [categorizedDiagrams, setCategorizedDiagrams] = useState<{ [key: string]: Diagram[] }>({});
   const t = useI18n();
-
-  const loadLucideIcon = (iconName: string): LucideIcon | null => {
-    try {
-      const { [iconName]: Icon } = require('lucide-react');
-      return Icon;
-    } catch {
-      return null;
-    }
-  };
 
   useEffect(() => {
     const fetchPostedDiagrams = async () => {
@@ -36,7 +29,6 @@ export default function Discover() {
           const likesResponse = await axios.get(`/api/diagrams/like?id=${diagram.id}`);
           return { ...diagram, likes: likesResponse.data.likes };
         }));
-        diagramsWithLikes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setPostedDiagrams(diagramsWithLikes);
       } catch (error) {
         console.error("❌ Error fetching posted diagrams:", error);
@@ -47,21 +39,25 @@ export default function Discover() {
   }, []);
 
   useEffect(() => {
-    if (postedDiagrams.length > 0) {
-      const categories: { [key: string]: { icon: string } } = {};
+    if (category && postedDiagrams.length > 0) {
+      const categories: { [key: string]: Diagram[] } = {};
 
       postedDiagrams.forEach((diagram) => {
-        const generalTag = diagram.content.tags?.general || "Uncategorized";
-        const icon = diagram.content.tags?.icon || "Tag";
+        const generalTag = diagram.content.tags?.general.toLowerCase() === (category as string).toLowerCase();
+        const specificTag = diagram.content.tags?.specific || "General";
 
-        if (!categories[generalTag]) {
-          categories[generalTag] = { icon };
+        if (generalTag) {
+          if (!categories[specificTag]) {
+            categories[specificTag] = [];
+          }
+
+          categories[specificTag].push(diagram);
         }
       });
 
-      setCategories(categories);
+      setCategorizedDiagrams(categories);
     }
-  }, [postedDiagrams]);
+  }, [category, postedDiagrams]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -81,23 +77,22 @@ export default function Discover() {
         )}
       </header>
       <div className="flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-8">Discover</h1>
+        <h1 className="text-3xl font-bold mb-8">Discover {category}</h1>
         <div className="flex flex-wrap justify-center space-x-4 mb-8">
-          {Object.keys(categories).map((generalTag) => {
-            const Icon = loadLucideIcon(categories[generalTag].icon);
-            return (
-              <Link key={generalTag} href={`/discover/${encodeURIComponent(generalTag)}`}>
-                <Button variant="secondary" className="flex items-center space-x-2">
-                  {Icon ? <Icon className="h-5 w-5" /> : <Tag className="h-5 w-5" />}
-                  <span>{generalTag}</span>
-                </Button>
-              </Link>
-            );
-          })}
+          {Object.keys(categorizedDiagrams).map((specificTag) => (
+            <Link key={specificTag} href={`/discover/${encodeURIComponent(category as string)}/${encodeURIComponent(specificTag)}`}>
+              <Button variant="secondary" className="flex items-center space-x-2">
+                <Tag className="h-5 w-5" />
+                <span>{specificTag}</span>
+              </Button>
+            </Link>
+          ))}
         </div>
         <div className="flex flex-col space-y-4 w-full">
-          {postedDiagrams.map((diagram, index) => (
-            <PublishedCard key={index} diagram={diagram} />
+          {Object.keys(categorizedDiagrams).map((specificTag) => (
+            categorizedDiagrams[specificTag].map((diagram, index) => (
+              <PublishedCard key={index} diagram={diagram} />
+            ))
           ))}
         </div>
       </div>

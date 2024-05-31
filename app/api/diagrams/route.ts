@@ -78,18 +78,38 @@ export async function DELETE(req: NextRequest) {
   try {
     if (id) {
       console.log('🛠 Deleting diagram with ID:', id);
+
+      await prisma.comment.deleteMany({
+        where: { diagramId: id },
+      });
+
+      await prisma.view.deleteMany({
+        where: { diagramId: id },
+      });
+
       await prisma.diagram.delete({
         where: { id },
       });
-      console.log('✅ Diagram deleted successfully');
-      return NextResponse.json({ message: 'Diagram deleted successfully' }, { status: 200 });
+
+      console.log('✅ Diagram and associated comments deleted successfully');
+      return NextResponse.json({ message: 'Diagram and associated comments deleted successfully' }, { status: 200 });
     } else {
       console.log('🛠 Deleting all diagrams');
+
+      await prisma.comment.deleteMany({
+        where: { diagram: { userId: session.user?.id ?? undefined } },
+      });
+
+      await prisma.view.deleteMany({
+        where: { diagram: { userId: session.user?.id ?? undefined } },
+      });
+
       await prisma.diagram.deleteMany({
         where: { userId: session.user?.id ?? undefined },
       });
-      console.log('✅ All diagrams deleted successfully');
-      return NextResponse.json({ message: 'All diagrams deleted successfully' }, { status: 200 });
+
+      console.log('✅ All diagrams and associated comments deleted successfully');
+      return NextResponse.json({ message: 'All diagrams and associated comments deleted successfully' }, { status: 200 });
     }
   } catch (error: any) {
     console.log('❌ Error deleting diagram:', error.message);
