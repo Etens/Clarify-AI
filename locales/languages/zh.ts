@@ -19,5 +19,8 @@ export default {
     'home.createPrompt': '创建...',
     'home.history': '历史记录',
     'home.copyDiagram': '复制当前图表',
+    'home.home': '首页',
     'account.generateAvatar': '生成头像',
+    'discover.discover': '发现',
+    'discover.comments': '评论',
 } as const;

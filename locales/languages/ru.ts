@@ -19,5 +19,8 @@ export default {
     'home.createPrompt': 'Создать...',
     'home.history': 'История',
     'home.copyDiagram': 'Копировать текущую схему',
+    'home.home': 'Домой',
     'account.generateAvatar': 'Создать аватар',
+    'discover.discover': 'Открыть',
+    'discover.comments': 'Комментарии',
 } as const;

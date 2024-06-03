@@ -19,5 +19,8 @@ export default {
     'home.createPrompt': 'إنشاء...',
     'home.history': 'التاريخ',
     'home.copyDiagram': 'نسخ الرسم الحالي',
+    'home.home': 'الرئيسية',
     'account.generateAvatar': 'إنشاء صورة رمزية',
+    'discover.discover': 'اكتشف',
+    'discover.comments': 'تعليقات',
 } as const;

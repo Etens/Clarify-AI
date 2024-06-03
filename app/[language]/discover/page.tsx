@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 import PublishedCard from '@/components/results/published-card';
@@ -9,10 +10,12 @@ import { Button } from "@/components/button/button";
 import { useI18n } from '@/locales/client';
 import axios from 'axios';
 import { Diagram } from 'next-auth';
-import { LucideIcon, Tag } from 'lucide-react'; 
+import { LucideIcon, Tag, Home as HomeIcon } from 'lucide-react';
 
-export default function Discover() {
-  const { data: session, status } = useSession();
+const Discover = () => {
+  const { data: session } = useSession();
+  const pathname = usePathname();
+  const language = pathname.split('/')[1];
   const [postedDiagrams, setPostedDiagrams] = useState<Diagram[]>([]);
   const [categories, setCategories] = useState<{ [key: string]: { icon: string } }>({});
   const t = useI18n();
@@ -30,21 +33,24 @@ export default function Discover() {
     const fetchPostedDiagrams = async () => {
       try {
         console.log("🚀 Fetching posted diagrams");
-        const response = await axios.get('/api/diagrams/published');
+        const response = await axios.get('/api/diagrams/published', {
+          params: { language },
+        });
         console.log("📄 Response data:", response.data);
         const diagramsWithLikes: Diagram[] = await Promise.all(response.data.map(async (diagram: Diagram) => {
           const likesResponse = await axios.get(`/api/diagrams/like?id=${diagram.id}`);
           return { ...diagram, likes: likesResponse.data.likes };
         }));
         diagramsWithLikes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setPostedDiagrams(diagramsWithLikes);
+        const filteredDiagrams = diagramsWithLikes.filter(diagram => diagram.content.language === language);
+        setPostedDiagrams(filteredDiagrams);
       } catch (error) {
         console.error("❌ Error fetching posted diagrams:", error);
       }
     };
 
     fetchPostedDiagrams();
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (postedDiagrams.length > 0) {
@@ -63,13 +69,20 @@ export default function Discover() {
     }
   }, [postedDiagrams]);
 
-  if (status === "loading") {
-    return <div>Loading...</div>;
+  if (!session) {
+    signIn();
+    return null;
   }
 
   return (
     <main className="min-h-screen text-white">
       <header className="flex justify-end p-4 space-x-4">
+        <Link href={`/`}>
+          <Button variant="secondary">
+            <HomeIcon className="h-5 w-5 mr-2" />
+            {t('home.home')}
+          </Button>
+        </Link>
         {session ? (
           <>
             <ParamsManager />
@@ -81,12 +94,14 @@ export default function Discover() {
         )}
       </header>
       <div className="flex flex-col items-center">
-        <h1 className="text-3xl font-bold mb-8">Discover</h1>
+        <h1 className="text-3xl font-bold mb-8">
+          {t('discover.discover')}
+        </h1>
         <div className="flex flex-wrap justify-center space-x-4 mb-8">
           {Object.keys(categories).map((generalTag) => {
             const Icon = loadLucideIcon(categories[generalTag].icon);
             return (
-              <Link key={generalTag} href={`/discover/${encodeURIComponent(generalTag)}`}>
+              <Link key={generalTag} href={`/${language}/discover/${encodeURIComponent(generalTag)}`}>
                 <Button variant="secondary" className="flex items-center space-x-2">
                   {Icon ? <Icon className="h-5 w-5" /> : <Tag className="h-5 w-5" />}
                   <span>{generalTag}</span>
@@ -103,4 +118,6 @@ export default function Discover() {
       </div>
     </main>
   );
-}
+};
+
+export default Discover;

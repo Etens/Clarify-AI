@@ -19,5 +19,8 @@ export default {
     'home.createPrompt': '作成...',
     'home.history': '履歴',
     'home.copyDiagram': '現在の図をコピー',
+    'home.home': 'ホーム',
     'account.generateAvatar': 'アバターを生成',
+    'discover.discover': '発見する',
+    'discover.comments': 'コメント',
 } as const;

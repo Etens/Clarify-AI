@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '../../api/auth/[...nextauth]/route';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const diagrams = await prisma.diagram.findMany({
-      where: { userId: session.user?.id ?? undefined },
+      where: { userId: (session as { user?: { id?: string } }).user?.id ?? undefined },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -45,10 +45,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    console.log('🛠 Creating new diagram for user:', session.user?.email);
+    console.log('🛠 Creating new diagram for user:', (session as { user?: { id?: string; email?: string } }).user?.email);
     const newDiagram = await prisma.diagram.create({
       data: {
-        userId: session.user?.id ?? '',
+        userId: (session as { user?: { id?: string } }).user?.id ?? '',
         content: JSON.parse(content),
         isPublished: isPublished,
         likes: 0,
@@ -87,6 +87,10 @@ export async function DELETE(req: NextRequest) {
         where: { diagramId: id },
       });
 
+      await prisma.like.deleteMany({
+        where: { diagramId: id },
+      });
+
       await prisma.diagram.delete({
         where: { id },
       });
@@ -97,15 +101,19 @@ export async function DELETE(req: NextRequest) {
       console.log('🛠 Deleting all diagrams');
 
       await prisma.comment.deleteMany({
-        where: { diagram: { userId: session.user?.id ?? undefined } },
+        where: { diagram: { userId: (session as { user?: { id?: string } }).user?.id ?? undefined } },
       });
 
       await prisma.view.deleteMany({
-        where: { diagram: { userId: session.user?.id ?? undefined } },
+        where: { diagram: { userId: (session as { user?: { id?: string } }).user?.id ?? undefined } },
+      });
+
+      await prisma.like.deleteMany({
+        where: { userId: (session as { user?: { id?: string } }).user?.id ?? undefined },
       });
 
       await prisma.diagram.deleteMany({
-        where: { userId: session.user?.id ?? undefined },
+        where: { userId: (session as { user?: { id?: string } }).user?.id ?? undefined },
       });
 
       console.log('✅ All diagrams and associated comments deleted successfully');

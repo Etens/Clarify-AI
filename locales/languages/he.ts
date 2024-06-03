@@ -20,4 +20,7 @@ export default {
     'home.history': 'היסטוריה',
     'home.copyDiagram': 'העתק תרשים נוכחי',
     'account.generateAvatar': 'צור אווטאר',
+    'discover.discover': 'גלה',
+    'home.home': 'בית',
+    'discover.comments': 'תגובות',
 } as const;

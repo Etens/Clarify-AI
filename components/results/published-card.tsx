@@ -8,6 +8,7 @@ import { Eye } from 'lucide-react';
 import axios from 'axios';
 import { Button } from '../button/button';
 import { formatDistanceToNow } from 'date-fns';
+import { useI18n } from '@/locales/client';
 
 interface PublishedCardProps {
   diagram: any;
@@ -16,6 +17,7 @@ interface PublishedCardProps {
 const PublishedCard = ({ diagram }: PublishedCardProps) => {
   console.log("🔍 Diagram data in PublishedCard:", diagram);
   const [comments, setComments] = useState([]);
+  const t = useI18n();
 
   const userInitial = diagram.user.name ? diagram.user.name.charAt(0) : '?';
 
@@ -134,7 +136,9 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
       </CardFooter>
 
       <div className="w-full p-4">
-        <h3 className="text-lg font-semibold">Comments</h3>
+        <h3 className="text-lg font-semibold">
+          {t('discover.comments')} ({comments.length})
+        </h3>
         <div className="space-y-2">
           {comments.map((comment: any, index: number) => (
             <div key={index} className="p-2 border rounded-lg flex items-start space-x-2">

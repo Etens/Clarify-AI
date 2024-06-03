@@ -8,6 +8,7 @@ import { Input } from "../common/searchbar";
 import { Label } from "../common/label";
 import axios from 'axios';
 import { useI18n } from '@/locales/client';
+import { User as UserIcon } from 'lucide-react';
 
 const languages = [
   { code: 'en', name: 'English' },
@@ -94,7 +95,10 @@ export function ParamsManager() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">{t('account.title')}</Button>
+        <Button variant="secondary">
+          <UserIcon className="h-5 w-5 mr-2" />
+          {t('account.title')}
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

@@ -19,5 +19,8 @@ export default {
     'home.createPrompt': 'Crea...',
     'home.history': 'Cronologia',
     'home.copyDiagram': 'Copia diagramma corrente',
+    'home.home': 'Home',
     'account.generateAvatar': 'Genera avatar',
+    'discover.discover': 'Scoprire',
+    'discover.comments': 'Commenti',
 } as const;

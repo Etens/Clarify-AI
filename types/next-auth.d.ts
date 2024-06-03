@@ -31,6 +31,7 @@ declare module 'next-auth' {
     content: any;
     id: string;
     title: string;
+    language: string;
     userPrompt: string;
     elements: ElementData[];
     illustrationLinks: { [key: string]: string };

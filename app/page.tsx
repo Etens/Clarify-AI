@@ -13,14 +13,17 @@ import { Progress } from "@/components/common/loader";
 import { ParamsManager } from "@/components/user/params-manager";
 import { useI18n } from '@/locales/client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/common/select";
+import { Compass as DiscoverIcon } from 'lucide-react';
 
 export default function Home() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
   const [diagrams, setDiagrams] = useState<any[]>([]);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
+  const [progressValue, setProgressValue] = useState(0);
   const t = useI18n();
+  const language = session?.user?.language;
 
   useEffect(() => {
     const fetchDiagrams = async () => {
@@ -42,6 +45,29 @@ export default function Home() {
 
     fetchDiagrams();
   }, [session]);
+
+  useEffect(() => {
+    let intervalId;
+    if (isLoading && progressValue < 90) {
+      setProgressValue(1);
+      intervalId = setInterval(() => {
+        setProgressValue((oldValue) => {
+          const randomChoice = Math.random();
+          let randomIncrease;
+          if (randomChoice < 0.8) {
+            randomIncrease = Math.floor(Math.random() * (15 - 5 + 1)) + 5;
+          } else {
+            randomIncrease = Math.floor(Math.random() * (25 - 16 + 1)) + 16;
+          }
+          const newValue = oldValue + randomIncrease;
+          return newValue > 90 ? 90 : newValue;
+        });
+      }, 400);
+    } else {
+      setProgressValue(100);
+      setTimeout(() => setProgressValue(0), 1000);
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (!isLoading && messages.length > 0) {
@@ -139,8 +165,12 @@ export default function Home() {
     }
   };
 
-  if (status === "loading") {
-    return <div>{t('home.loading')}</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <Progress className="w-1/2" value={progressValue} />
+      </div>
+    );
   }
 
   const handleStyleChange = (value: string) => {
@@ -154,9 +184,10 @@ export default function Home() {
         {session ? (
           <>
             <div className="flex items-center justify-center space-x-4">
-              <Link href="/discover">
+              <Link href={`/${language}/discover`}>
                 <Button variant="secondary">
-                  Discover
+                  <DiscoverIcon className="h-5 w-5 mr-2" />
+                  {t('discover.discover')}
                 </Button>
               </Link>
               <ParamsManager />
@@ -177,29 +208,10 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <section className="flex flex-col items-center justify-center w-full p-0">
-                <div className="flex items-center">
-                  <div className="flex overflow-x-auto">
-                    {diagrams.map((diagram, index) => (
-                      <div key={index} className="relative transform w-full scale-[0.8]">
-                        <ResultView
-                          id={diagram.id}
-                          userPrompt={diagram.userPrompt}
-                          elements={diagram.elements || []}
-                          illustrationLinks={diagram.illustrationLinks}
-                          diagrams={diagrams}
-                          setDiagrams={setDiagrams}
-                          index={index}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-              <section className="flex items-center w-full flex-col mb-32 lg:justify-center">
-                <div className="flex flex-col items-center w-full">
-                  <form className="flex flex-col items-center w-full mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
-                    <div className="flex items-center justify-center w-full space-x-4">
+              <section className="flex items-center flex-col mt-24 lg:justify-center">
+                <div className="flex flex-col items-center">
+                  <form className="flex flex-col items-center mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
+                    <div className="flex items-center justify-center space-x-4">
                       <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} className="w-96" />
                       <Button type="submit" className="w-24" variant="secondary">
                         {t('home.createPrompt')}
@@ -224,6 +236,25 @@ export default function Home() {
                       <ClearButton setDiagrams={setDiagrams} />
                     </div>
                   </form>
+                </div>
+              </section>
+              <section className="flex flex-col items-center justify-center w-full p-0">
+                <div className="flex items-center">
+                  <div className="flex overflow-x-auto flex-col items-center justify-center w-full">
+                    {diagrams.map((diagram, index) => (
+                      <div key={index} className="relative transform w-full scale-[0.8]">
+                        <ResultView
+                          id={diagram.id}
+                          userPrompt={diagram.userPrompt}
+                          elements={diagram.elements || []}
+                          illustrationLinks={diagram.illustrationLinks}
+                          diagrams={diagrams}
+                          setDiagrams={setDiagrams}
+                          index={index}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </section>
             </>

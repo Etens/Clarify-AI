@@ -7,7 +7,13 @@ interface PublishButtonProps {
 }
 
 export function PublishButton({ diagramID }: PublishButtonProps) {
+
   const handlePublishDiagram = async () => {
+    if (!diagramID) {
+      console.error('Diagram ID is required');
+      return;
+    }
+
     try {
       console.log("Publishing diagram with ID:", diagramID);
       await axios.patch(`/api/diagrams?id=${diagramID}&isPublished=true`);

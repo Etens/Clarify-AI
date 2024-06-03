@@ -22,7 +22,7 @@ interface ResultViewProps {
 
 const ResultView = ({ id, elements, illustrationLinks, userPrompt }: ResultViewProps) => {
   return (
-    <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-lg relative scale-75">
+    <div className="flex items-center bg-white p-4 rounded-lg shadow-lg relative scale-75">
       <div id={id} className='w-full p-4 rounded-lg'>
         <div className="flex justify-end absolute top-2 right-2 space-x-2">
           <CopyButton targetId={id} />
