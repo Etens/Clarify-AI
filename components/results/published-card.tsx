@@ -106,8 +106,8 @@ const PublishedCard = ({ diagram }: PublishedCardProps) => {
           {diagram.content.elements && diagram.content.elements.map((element: any, index: number) => (
             <div key={index} className="p-4 border rounded-lg">
               <h3 className="text-md font-semibold">{element.ElementName}</h3>
-              {diagram.content.illustrationLinks && diagram.content.illustrationLinks[element.ElementName] && (
-                <img src={diagram.content.illustrationLinks[element.ElementName]} alt={element.ElementName} className="mb-2" />
+              {element.Illustration && (
+                <img src={element.Illustration} alt={element.ElementName} className="mb-2" />
               )}
               <p className="text-sm text-gray-600">{element.Explanation}</p>
             </div>

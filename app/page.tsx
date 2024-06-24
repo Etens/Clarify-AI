@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from "react";
-import { useChat } from "ai/react";
+import { Message, useAssistant } from 'ai/react';
 import { useSession, signIn } from 'next-auth/react';
 import axios from "axios";
 import Link from 'next/link';
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Compass as DiscoverIcon } from 'lucide-react';
 
 export default function Home() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
+  const { status, messages, input, submitMessage, handleInputChange } = useAssistant({ api: '/api/assistant' });
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
   const [diagrams, setDiagrams] = useState<any[]>([]);
@@ -24,22 +24,24 @@ export default function Home() {
   const [progressValue, setProgressValue] = useState(0);
   const t = useI18n();
   const language = session?.user?.language;
+  const isLoading = status === 'in_progress';
 
   useEffect(() => {
     const fetchDiagrams = async () => {
       if (session) {
+        console.log("🔄 Fetching diagrams...");  // Ajout de console.log
         try {
           const response = await axios.get('/api/diagrams', {
             params: { email: session.user?.email }
           });
           const filteredDiagrams = response.data.map((diagram: any) => ({ ...diagram.content, id: diagram.id }));
           setDiagrams(filteredDiagrams);
-          console.log("Diagrams fetched successfully", filteredDiagrams);
+          console.log("✅ Diagrams fetched successfully", filteredDiagrams);  // Ajout de console.log
         } catch (error) {
-          console.error("Error fetching diagrams:", error);
+          console.error("❌ Error fetching diagrams:", error);  // Ajout de console.log
         }
       } else {
-        console.log("No session found");
+        console.log("ℹ️ No session found");  // Ajout de console.log
       }
     };
 
@@ -73,6 +75,7 @@ export default function Home() {
     if (!isLoading && messages.length > 0) {
       const userMessage = messages.filter((message) => message.role === "user").pop()?.content;
       if (userMessage) {
+        console.log("📩 User message received:", userMessage);  // Ajout de console.log
         setUserPrompt(userMessage);
       }
     }
@@ -80,7 +83,9 @@ export default function Home() {
 
   useEffect(() => {
     if (userPrompt) {
+      console.log("📝 Processing user prompt:", userPrompt);  // Log processing user prompt
       const assistantMessages = messages.filter((message) => message.role === "assistant");
+      console.log("📨 Assistant messages:", assistantMessages);  // Log assistant messages
 
       const filteredAndParsedMessages = assistantMessages
         .map((assistantMessage) => {
@@ -91,77 +96,36 @@ export default function Home() {
           try {
             return JSON.parse(cleanedContent);
           } catch (error) {
-            console.error("Erreur lors du parsing du contenu du message de l'assistant:", error);
+            console.error("❌ Error parsing assistant message content:", error);  // Log parsing error
             return null;
           }
         })
         .filter((content) => content !== null);
 
       if (filteredAndParsedMessages.length > 0) {
-        console.log("Messages filtrés et parsés :", filteredAndParsedMessages);
+        console.log("📄 Filtered and parsed messages:", filteredAndParsedMessages);  // Log filtered and parsed messages
 
         const newDiagram = { ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt };
-
-        fetchIllustrations(newDiagram, filteredAndParsedMessages);
+        const updatedHistory = [...diagrams, newDiagram];
+        setDiagrams(updatedHistory);
+        saveDiagram(newDiagram);
       }
     }
   }, [userPrompt]);
 
-  const fetchIllustrations = async (newDiagram: any, parsedMessages: any[]) => {
-    console.log("Début de fetchIllustrations");
-
-    const latestDiagram = newDiagram;
-    const elements = latestDiagram?.elements;
-
-    if (!elements) {
-      console.error("Aucun élément trouvé dans le JSON.");
-      return;
-    }
-
-    const illustrationPromises = elements.map(async (element: any) => {
-      const keywords = element.Keywords.split(", ").map((keyword: string) => keyword.trim());
-      for (let keyword of keywords) {
-        const url = `/api/illustrations?keyword=${keyword}&style=${style}`;
-        console.log(`Requête pour le mot-clé ${keyword} à l'URL : ${url}`);
-        try {
-          const response = await axios.get(url);
-          if (response.status === 200 && response.data) {
-            return { element: element.ElementName, url: response.data };
-          }
-        } catch (error) {
-          console.error("Erreur lors de la requête pour le mot-clé:", keyword, error);
-        }
-      }
-      return { element: element.ElementName, url: null };
-    });
-
-    const illustrationResults = await Promise.all(illustrationPromises);
-
-    const newIllustrationLinks = illustrationResults.reduce((acc, curr) => {
-      if (curr.url) {
-        acc[curr.element] = curr.url;
-      }
-      return acc;
-    }, {});
-
-    const updatedDiagram = { ...newDiagram, illustrationLinks: newIllustrationLinks };
-    const updatedHistory = [...diagrams, updatedDiagram];
-    setDiagrams(updatedHistory);
-    saveDiagram(updatedDiagram);
-  };
-
   const saveDiagram = async (diagram: any) => {
+    console.log("💾 Saving diagram...");  // Ajout de console.log
     try {
       const url = `/api/diagrams?content=${encodeURIComponent(JSON.stringify(diagram))}&isPublished=${diagram.isPublished}`;
       const response = await axios.post(url);
       if (response.status === 200) {
-        console.log("Diagram saved successfully", response.data);
+        console.log("✅ Diagram saved successfully", response.data);  // Ajout de console.log
         setDiagrams(prevDiagrams => prevDiagrams.map(d => d === diagram ? { ...diagram, id: response.data.id } : d));
       } else {
-        console.error("Failed to save diagram");
+        console.error("❌ Failed to save diagram");  // Ajout de console.log
       }
     } catch (error) {
-      console.error('An error occurred while saving diagram:', error);
+      console.error('❌ An error occurred while saving diagram:', error);  // Ajout de console.log
     }
   };
 
@@ -175,7 +139,7 @@ export default function Home() {
 
   const handleStyleChange = (value: string) => {
     setStyle(value);
-    console.log("Style sélectionné :", value);
+    console.log("🎨 Style selected:", value);  // Ajout de console.log
   };
 
   return (
@@ -210,7 +174,7 @@ export default function Home() {
             <>
               <section className="flex items-center flex-col mt-24 lg:justify-center">
                 <div className="flex flex-col items-center">
-                  <form className="flex flex-col items-center mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
+                  <form className="flex flex-col items-center mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={submitMessage}>
                     <div className="flex items-center justify-center space-x-4">
                       <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} className="w-96" />
                       <Button type="submit" className="w-24" variant="secondary">
@@ -247,7 +211,6 @@ export default function Home() {
                           id={diagram.id}
                           userPrompt={diagram.userPrompt}
                           elements={diagram.elements || []}
-                          illustrationLinks={diagram.illustrationLinks}
                           diagrams={diagrams}
                           setDiagrams={setDiagrams}
                           index={index}

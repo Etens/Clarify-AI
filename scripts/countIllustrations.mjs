@@ -3,21 +3,6 @@ import cliProgress from 'cli-progress';
 import ora from 'ora';
 import fs from 'fs';
 import readlineSync from 'readline-sync';
-import axios from 'axios';
-
-// Fonction pour générer le vecteur
-const generateVector = async (text) => {
-  const response = await axios.post('https://api.openai.com/v1/embeddings', {
-    input: text,
-    model: 'text-embedding-ada-002'
-  }, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-    }
-  });
-  return response.data.data[0].embedding;
-};
 
 // Demande les options à l'utilisateur
 const getUserOptions = () => {
@@ -108,22 +93,17 @@ const { maxTimeMinutes, headless, closeBrowser } = getUserOptions();
   const endTime = Date.now();
   const duration = ((endTime - startTime) / 1000).toFixed(2); // in seconds
 
-  // Ajouter les vecteurs
-  const uniqueData = Array.from(illustrationData).map(link => JSON.parse(link));
-  for (const illustration of uniqueData) {
-    illustration.vector = await generateVector(illustration.title);
-  }
-
   // Sauvegarder les données JSON dans un fichier
-  fs.writeFileSync('scripts/illustrations.json', JSON.stringify(uniqueData, null, 2));
+  fs.writeFileSync('scripts/illustrations.json', JSON.stringify([...illustrationData], null, 2));
 
-  spinner.succeed(`\n\nIllustrations Found: ${uniqueData.length}`);
+  // Mise à jour du message de fin avec illustrationData
+  spinner.succeed(`\n\nIllustrations Found: ${illustrationData.size}`);
   console.log(`
-  ============================
-  Illustrations Found: ${uniqueData.length}
-  Time Taken: ${duration} seconds
-  ============================
-  `);
+    ============================
+    Illustrations Found: ${illustrationData.size}
+    Time Taken: ${duration} seconds
+    ============================
+`);
 
   // Fermeture du navigateur selon le choix de l'utilisateur
   if (closeBrowser) {

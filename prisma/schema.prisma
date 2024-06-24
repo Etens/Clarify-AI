@@ -27,18 +27,18 @@ model User {
 }
 
 model Diagram {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id], name: "UserDiagrams")
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String?   @db.ObjectId
+  user        User?     @relation(fields: [userId], references: [id], name: "UserDiagrams")
   content     Json
-  isPublished Boolean  @default(false)
-  likes       Int      @default(0)
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
+  isPublished Boolean   @default(false)
+  likes       Int       @default(0)
+  views       Int       @default(0)
+  createdAt   DateTime  @default(now())
   tags        String[]
   comments    Comment[] @relation("DiagramComments")
-  userViews   View[]   @relation("DiagramViews")
-  userLikes   Like[]   @relation("DiagramLikes")
+  userViews   View[]    @relation("DiagramViews")
+  userLikes   Like[]    @relation("DiagramLikes")
 }
 
 model Comment {

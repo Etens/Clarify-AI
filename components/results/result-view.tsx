@@ -5,22 +5,20 @@ import { PublishButton } from '../button/publish-button';
 
 interface ElementData {
   ElementName: string;
-  Keywords: string;
+  Illustration: string;
   Explanation: string;
-  ImageURL?: string;
 }
 
 interface ResultViewProps {
   id: string;
   elements: ElementData[];
-  illustrationLinks: { [key: string]: string };
   userPrompt?: string;
   diagrams?: any[];
   setDiagrams?: (history: any[]) => void;
   index?: number;
 }
 
-const ResultView = ({ id, elements, illustrationLinks, userPrompt }: ResultViewProps) => {
+const ResultView = ({ id, elements, userPrompt }: ResultViewProps) => {
   return (
     <div className="flex items-center bg-white p-4 rounded-lg shadow-lg relative scale-75">
       <div id={id} className='w-full p-4 rounded-lg'>
@@ -37,8 +35,8 @@ const ResultView = ({ id, elements, illustrationLinks, userPrompt }: ResultViewP
           {elements.map((element, index) => (
             <div key={index} className="p-4 border rounded-lg">
               <h3 className="text-md font-semibold">{element.ElementName}</h3>
-              {illustrationLinks[element.ElementName] && (
-                <img src={illustrationLinks[element.ElementName]} alt={element.ElementName} className="mb-2" />
+              {element.Illustration && (
+                <img src={element.Illustration} alt={element.ElementName} className="mb-2" />
               )}
               <p className="text-sm text-gray-600">{element.Explanation}</p>
             </div>

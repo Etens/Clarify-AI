@@ -18,14 +18,13 @@ declare module 'next-auth' {
     themePreference?: boolean;
     createdAt?: string;
   }
-  
+
   interface ElementData {
     ElementName: string;
-    Keywords: string;
+    Illustration: string;
     Explanation: string;
-    ImageURL?: string;
   }
-  
+
   interface Diagram {
     createdAt: string | number | Date;
     content: any;
