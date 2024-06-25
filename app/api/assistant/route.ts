@@ -15,18 +15,27 @@ export async function POST(req: Request) {
     const input: {
         threadId: string | null;
         message: string;
+        language: string; // Ajout du paramètre de langue
+        style: string; // Ajout du paramètre de style
     } = await req.json();
 
     console.log("📥 Request received:", input);  // Log the received request
 
+    // Ajouter les informations de langage et de style au message
+    const enrichedMessage = `${input.message} Please respond in ${input.language} for all parts of the response, except for keywords for illustrations and icon names in tags which should remain in English. Ensure that the title of the diagram, the names of elements, and the names of tags are all in ${input.language}. Only the keywords for illustrations and the icon names in tags should remain in English. Additionally, include the property "language" in the response JSON to indicate the language of the diagram. Also, ensure that the illustrations use the style ${input.style} when searching in the file and only use this style ${input.style}.`;
+
     // Create a thread if needed
-    const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
-    console.log("🧵 Thread created:", threadId);  // Log the created thread ID
+    let threadId = input.threadId;
+    if (!threadId) {
+        const createdThread = await openai.beta.threads.create({});
+        threadId = createdThread.id;
+        console.log("🧵 Thread created:", threadId);  // Log the created thread ID
+    }
 
     // Add a message to the thread
     const createdMessage = await openai.beta.threads.messages.create(threadId, {
         role: 'user',
-        content: input.message,
+        content: enrichedMessage,
     });
     console.log("💬 Message added to thread:", createdMessage);  // Log the added message
 

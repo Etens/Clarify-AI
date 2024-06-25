@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Compass as DiscoverIcon } from 'lucide-react';
 
 export default function Home() {
-  const { status, messages, input, submitMessage, handleInputChange } = useAssistant({ api: '/api/assistant' });
+  const { status, messages, input, setInput, submitMessage, handleInputChange, error, append } = useAssistant({ api: '/api/assistant' });
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
   const [diagrams, setDiagrams] = useState<any[]>([]);
@@ -82,6 +82,12 @@ export default function Home() {
   }, [messages, isLoading]);
 
   useEffect(() => {
+    if (error) {
+      console.error("❌ An error occurred:", error);  // Ajout de console.log
+    }
+  }, [error]);
+
+  useEffect(() => {
     if (userPrompt) {
       console.log("📝 Processing user prompt:", userPrompt);  // Log processing user prompt
       const assistantMessages = messages.filter((message) => message.role === "assistant");
@@ -142,6 +148,21 @@ export default function Home() {
     console.log("🎨 Style selected:", value);  // Ajout de console.log
   };
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    // Ajouter les informations de langage et de style au prompt
+    const enrichedPrompt = `${input} Please respond in ${language} for all parts of the response, except for keywords for illustrations and icon names in tags which should remain in English. Ensure that the title of the diagram, the names of elements, and the names of tags are all in ${language}. Only the keywords for illustrations and the icon names in tags should remain in English. Additionally, include the property "language" in the response JSON to indicate the language of the diagram. Also, ensure that the illustrations use the style ${style} when searching in the file and only use this style ${style}.`;
+
+    // Utiliser `append` pour ajouter le message enrichi
+    try {
+      await append({ role: 'user', content: enrichedPrompt });
+      console.log("📤 Submitting enriched message:", enrichedPrompt);  // Ajout de console.log
+    } catch (error) {
+      console.error("❌ Failed to submit message:", error);
+    }
+  };
+
   return (
     <main className="min-h-screen text-white">
       <header className="flex justify-end p-4 space-x-4">
@@ -174,9 +195,16 @@ export default function Home() {
             <>
               <section className="flex items-center flex-col mt-24 lg:justify-center">
                 <div className="flex flex-col items-center">
-                  <form className="flex flex-col items-center mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={submitMessage}>
+                  <form className="flex flex-col items-center mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
                     <div className="flex items-center justify-center space-x-4">
-                      <Input type="text" value={input} onChange={handleInputChange} placeholder={t('home.createPrompt')} className="w-96" />
+                      <Input
+                        type="text"
+                        value={input}
+                        onChange={handleInputChange}
+                        placeholder={t('home.createPrompt')}
+                        className="w-96"
+                        disabled={status !== 'awaiting_message'}
+                      />
                       <Button type="submit" className="w-24" variant="secondary">
                         {t('home.createPrompt')}
                       </Button>
@@ -230,3 +258,7 @@ export default function Home() {
     </main>
   );
 }
+function append(arg0: { role: string; content: string; }) {
+  throw new Error("Function not implemented.");
+}
+
