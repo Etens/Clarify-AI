@@ -14,12 +14,26 @@ import { ParamsManager } from "@/components/user/params-manager";
 import { useI18n } from '@/locales/client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/common/select";
 import { Compass as DiscoverIcon } from 'lucide-react';
+import { CardStack } from "../components/results/card_v2";
+
+interface ElementData {
+  ElementName: string;
+  Illustration: string;
+  Explanation: string;
+}
+
+interface Diagram {
+  id: string;
+  title: string;
+  elements: ElementData[];
+  userPrompt?: string;
+}
 
 export default function Home() {
-  const { status, messages, input, setInput, submitMessage, handleInputChange, error, append } = useAssistant({ api: '/api/assistant' });
+  const { status, messages, input, handleInputChange, error, append } = useAssistant({ api: '/api/assistant' });
   const [style, setStyle] = useState("rafiki");
   const [userPrompt, setUserPrompt] = useState("");
-  const [diagrams, setDiagrams] = useState<any[]>([]);
+  const [diagrams, setDiagrams] = useState<Diagram[]>([]);
   const { data: session } = useSession();
   const [progressValue, setProgressValue] = useState(0);
   const t = useI18n();
@@ -29,24 +43,48 @@ export default function Home() {
   useEffect(() => {
     const fetchDiagrams = async () => {
       if (session) {
-        console.log("🔄 Fetching diagrams...");  // Ajout de console.log
+        console.log("🔄 Fetching diagrams...");
         try {
           const response = await axios.get('/api/diagrams', {
             params: { email: session.user?.email }
           });
-          const filteredDiagrams = response.data.map((diagram: any) => ({ ...diagram.content, id: diagram.id }));
+          console.log("📦 Response:", response.data);
+          const filteredDiagrams = response.data.map((diagram: any) => ({
+            ...diagram.content,
+            id: diagram.id,
+            title: diagram.content.title,
+            elements: Array.isArray(diagram.content.elements) ? diagram.content.elements : []
+          }));
           setDiagrams(filteredDiagrams);
-          console.log("✅ Diagrams fetched successfully", filteredDiagrams);  // Ajout de console.log
+          console.log("✅ Diagrams fetched successfully", filteredDiagrams);
         } catch (error) {
-          console.error("❌ Error fetching diagrams:", error);  // Ajout de console.log
+          console.error("❌ Error fetching diagrams:", error);
         }
       } else {
-        console.log("ℹ️ No session found");  // Ajout de console.log
+        console.log("ℹ️ No session found");
       }
     };
 
     fetchDiagrams();
   }, [session]);
+
+  const CARDS = diagrams.map((diagram, index) => ({
+    id: diagram.id || `ID not available for diagram ${index + 1}`,
+    name: diagram.title || `Title not available for diagram ${index + 1}`,
+    content: (
+      <div className="card-content p-2 flex flex-wrap justify-between">
+        {diagram.elements.map((element, elemIndex) => (
+          <div key={elemIndex} className="element flex flex-col items-center mb-4 w-1/2 px-2">
+            <h3 className="element-name text-xs font-bold mb-1 text-center">{element.ElementName || "Element name not available"}</h3>
+            <img className="element-illustration w-full h-24 object-contain rounded-md mb-1" src={element.Illustration || ""} alt={element.ElementName} />
+            <p className="element-explanation text-xs text-center">{element.Explanation || "Explanation not available"}</p>
+          </div>
+        ))}
+      </div>
+    ),
+  }));
+
+  console.log("🃏 CARDS data:", CARDS);
 
   useEffect(() => {
     let intervalId;
@@ -230,23 +268,12 @@ export default function Home() {
                   </form>
                 </div>
               </section>
-              <section className="flex flex-col items-center justify-center w-full p-0">
-                <div className="flex items-center">
-                  <div className="flex overflow-x-auto flex-col items-center justify-center w-full">
-                    {diagrams.map((diagram, index) => (
-                      <div key={index} className="relative transform w-full scale-[0.8]">
-                        <ResultView
-                          id={diagram.id}
-                          userPrompt={diagram.userPrompt}
-                          elements={diagram.elements || []}
-                          diagrams={diagrams}
-                          setDiagrams={setDiagrams}
-                          index={index}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <section className="flex flex-col items-center justify-center w-full p-0 h-full mt-10"> {/* Ajouter mt-10 pour l'espacement depuis le haut */}
+                {diagrams.length > 0 ? (
+                  <CardStack items={CARDS} />
+                ) : (
+                  <p>Loading diagrams...</p>
+                )}
               </section>
             </>
           )}
@@ -258,7 +285,3 @@ export default function Home() {
     </main>
   );
 }
-function append(arg0: { role: string; content: string; }) {
-  throw new Error("Function not implemented.");
-}
-

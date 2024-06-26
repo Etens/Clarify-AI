@@ -47,4 +47,5 @@ const ResultView = ({ id, elements, userPrompt }: ResultViewProps) => {
   );
 };
 
+
 export default ResultView;

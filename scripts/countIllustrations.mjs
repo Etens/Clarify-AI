@@ -17,6 +17,32 @@ const getUserOptions = () => {
 
 const { maxTimeMinutes, headless, closeBrowser } = getUserOptions();
 
+let illustrationData = new Set();
+
+const saveData = () => {
+  fs.writeFileSync('scripts/illustrations.json', JSON.stringify([...illustrationData], null, 2));
+  console.log('Data saved to scripts/illustrations.json');
+};
+
+// Capture termination signals to save data before exiting
+process.on('SIGINT', () => {
+  console.log('SIGINT received. Saving data...');
+  saveData();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Saving data...');
+  saveData();
+  process.exit(0);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+  saveData();
+  process.exit(1);
+});
+
 (async () => {
   const startTime = Date.now();
   const spinner = ora('Launching browser...').start();
@@ -33,9 +59,6 @@ const { maxTimeMinutes, headless, closeBrowser } = getUserOptions();
   progressBar.start(100, 0);
 
   const styles = ['rafiki', 'bro', 'amico', 'pana', 'cuate'];
-  let totalHeight = 0;
-  const distance = 1000;
-  let illustrationData = new Set();
   let previousHeight = 0;
 
   while (true) {
@@ -94,7 +117,7 @@ const { maxTimeMinutes, headless, closeBrowser } = getUserOptions();
   const duration = ((endTime - startTime) / 1000).toFixed(2); // in seconds
 
   // Sauvegarder les données JSON dans un fichier
-  fs.writeFileSync('scripts/illustrations.json', JSON.stringify([...illustrationData], null, 2));
+  saveData();
 
   // Mise à jour du message de fin avec illustrationData
   spinner.succeed(`\n\nIllustrations Found: ${illustrationData.size}`);
