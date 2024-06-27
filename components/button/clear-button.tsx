@@ -21,8 +21,8 @@ export function ClearButton({ setDiagrams }: ClearButtonProps) {
   };
 
   return (
-    <Button variant="default" size="icon" onClick={handleClearDiagrams} className="clear-button hover:bg-red-500">
-      <Trash className="h-4 w-4 text-white" />
+    <Button variant="outline" size="icon" onClick={handleClearDiagrams} className="clear-button hover:bg-red-300">
+      <Trash className="h-4 w-4 text-black" />
     </Button>
   );
 }

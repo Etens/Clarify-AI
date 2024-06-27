@@ -5,7 +5,6 @@ import { Message, useAssistant } from 'ai/react';
 import { useSession, signIn } from 'next-auth/react';
 import axios from "axios";
 import Link from 'next/link';
-import ResultView from "@/components/results/result-view";
 import ClearButton from "@/components/button/clear-button";
 import { Input } from "@/components/common/searchbar";
 import { Button } from "@/components/button/button";
@@ -72,11 +71,11 @@ export default function Home() {
     id: diagram.id || `ID not available for diagram ${index + 1}`,
     name: diagram.title || `Title not available for diagram ${index + 1}`,
     content: (
-      <div className="card-content p-2 flex flex-wrap justify-between">
+      <div className="card-content px-8 flex flex-wrap justify-between">
         {diagram.elements.map((element, elemIndex) => (
-          <div key={elemIndex} className="element flex flex-col items-center mb-4 w-1/2 px-2">
-            <h3 className="element-name text-xs font-bold mb-1 text-center">{element.ElementName || "Element name not available"}</h3>
-            <img className="element-illustration w-full h-24 object-contain rounded-md mb-1" src={element.Illustration || ""} alt={element.ElementName} />
+          <div key={elemIndex} className="element flex flex-col items-center mb-4 w-1/2 px-4 mt-5">
+            <h3 className="element-name text-sm font-bold mb-1 text-center">{element.ElementName || "Element name not available"}</h3>
+            <img className="element-illustration w-full h-56 object-contain rounded-md mb-1 p-2" src={element.Illustration || ""} alt={element.ElementName} />
             <p className="element-explanation text-xs text-center">{element.Explanation || "Explanation not available"}</p>
           </div>
         ))}
@@ -202,7 +201,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen text-white">
+    <main className="min-h-screen flex flex-col justify-between text-white">
       <header className="flex justify-end p-4 space-x-4">
         {session ? (
           <>
@@ -223,65 +222,60 @@ export default function Home() {
         )}
       </header>
 
-      {session ? (
+      <section className="flex flex-col items-center flex-grow px-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full bg-black bg-opacity-50 rounded-lg">
+            <Progress className="w-1/2" value={progressValue} />
+          </div>
+        ) : (
+          <>
+            <section className="flex flex-col items-center justify-center w-full p-0 mt-24">
+              {diagrams.length > 0 ? (
+                <CardStack items={CARDS} />
+              ) : (
+                <p>Loading diagrams...</p>
+              )}
+            </section>
+          </>
+        )
+        }
+      </section >
+
+      <section className="w-full fixed bottom-0 bg-black p-8">
+        <div className="flex items-center mt-4 space-x-4 mb-4">
+          <Select onValueChange={handleStyleChange}>
+            <SelectTrigger className="bg-white p-2 rounded text-black w-20 hover:bg-accent hover:text-accent-foreground">
+              <SelectValue placeholder="Style" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Style</SelectLabel>
+                <SelectItem value="rafiki">Rafiki</SelectItem>
+                <SelectItem value="bro">Bro</SelectItem>
+                <SelectItem value="amico">Amico</SelectItem>
+                <SelectItem value="pana">Pana</SelectItem>
+                <SelectItem value="cuate">Cuate</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <ClearButton setDiagrams={setDiagrams} />
+        </div>
         <div className="flex flex-col items-center">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-screen bg-black">
-              <Progress className="w-1/2" value={50} />
-            </div>
-          ) : (
-            <>
-              <section className="flex items-center flex-col mt-24 lg:justify-center">
-                <div className="flex flex-col items-center">
-                  <form className="flex flex-col items-center mt-20 p-10 md:mt-0 md:w-60 md:p-0" onSubmit={handleSubmit}>
-                    <div className="flex items-center justify-center space-x-4">
-                      <Input
-                        type="text"
-                        value={input}
-                        onChange={handleInputChange}
-                        placeholder={t('home.createPrompt')}
-                        className="w-96"
-                        disabled={status !== 'awaiting_message'}
-                      />
-                      <Button type="submit" className="w-24" variant="secondary">
-                        {t('home.createPrompt')}
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-center mt-4 space-x-4">
-                      <Select onValueChange={handleStyleChange}>
-                        <SelectTrigger className="bg-primary p-2 rounded text-white w-24">
-                          <SelectValue placeholder="Style" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Style</SelectLabel>
-                            <SelectItem value="rafiki">Rafiki</SelectItem>
-                            <SelectItem value="bro">Bro</SelectItem>
-                            <SelectItem value="amico">Amico</SelectItem>
-                            <SelectItem value="pana">Pana</SelectItem>
-                            <SelectItem value="cuate">Cuate</SelectItem>
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <ClearButton setDiagrams={setDiagrams} />
-                    </div>
-                  </form>
-                </div>
-              </section>
-              <section className="flex flex-col items-center justify-center w-full p-0 h-full mt-10"> {/* Ajouter mt-10 pour l'espacement depuis le haut */}
-                {diagrams.length > 0 ? (
-                  <CardStack items={CARDS} />
-                ) : (
-                  <p>Loading diagrams...</p>
-                )}
-              </section>
-            </>
-          )}
+          <form className="flex items-center space-x-4 w-full" onSubmit={handleSubmit}>
+            <Input
+              type="text"
+              value={input}
+              onChange={handleInputChange}
+              placeholder={t('home.createPrompt')}
+              className="w-full"
+              disabled={status !== 'awaiting_message'}
+            />
+            <Button type="submit" className="w-24" variant="secondary">
+              {t('home.createPrompt')}
+            </Button>
+          </form>
         </div>
-      ) : (
-        <div className="flex items-center justify-center h-screen bg-black">
-        </div>
-      )}
-    </main>
+      </section>
+    </main >
   );
 }

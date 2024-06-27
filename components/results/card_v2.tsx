@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -38,7 +36,7 @@ export const CardStack = ({
     };
 
     return (
-        <div className="relative w-96 md:h-112 md:w-[28rem] border-red-800"> {/* Taille fixe de la carte */}
+        <div className="relative w-[60rem] h-full flex items-center justify-center scale-[0.8]">
             {cards.map((card, index) => {
                 if (!card) {
                     console.error(`Card at index ${index} is undefined`);
@@ -60,21 +58,21 @@ export const CardStack = ({
                 return (
                     <motion.div
                         key={card.id}
-                        className="absolute bg-white dark:bg-gray-800 h-96 w-96 md:h-112 md:w-[28rem] rounded-3xl p-4 shadow-xl border border-red-500 flex flex-col justify-between cursor-pointer overflow-hidden"
+                        className="absolute bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-xl border-2 border-gray-200 border-solid flex flex-col justify-between cursor-pointer overflow-hidden"
                         style={{ transformOrigin: "top center" }}
                         animate={{
                             top: index * -CARD_OFFSET,
                             scale: 1 - index * SCALE_FACTOR,
                             zIndex: cards.length - index,
                         }}
-                        onClick={() => handleCardClick(index)}
+                        onClick={() => handleCardClick(index)} // Ajout du gestionnaire de clic
                     >
                         <div className="p-5 text-center">
-                            <p className="text-neutral-500 font-medium dark:text-white mb-4">
+                            <p className="text-neutral-500 font-medium dark:text-white">
                                 {card.name}
                             </p>
                         </div>
-                        <div className="font-normal text-neutral-700 dark:text-neutral-200 text-ellipsis flex flex-wrap justify-between">
+                        <div className="font-normal text-neutral-700 dark:text-neutral-200 overflow-hidden text-ellipsis flex flex-wrap justify-between">
                             {card.content}
                         </div>
                     </motion.div>
@@ -82,5 +80,4 @@ export const CardStack = ({
             })}
         </div>
     );
-
-};
+}
