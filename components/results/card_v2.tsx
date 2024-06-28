@@ -5,6 +5,7 @@ type Card = {
     id: string;
     name: string;
     content: React.ReactNode;
+    buttons: React.ReactNode;
 };
 
 export const CardStack = ({
@@ -20,17 +21,15 @@ export const CardStack = ({
     const SCALE_FACTOR = scaleFactor || 0.06;
     const [cards, setCards] = useState<Card[]>(items);
 
-    // Suppression de l'intervalle de défilement automatique
     useEffect(() => {
         setCards(items);
     }, [items]);
 
-    // Gestionnaire de clic pour faire défiler les cartes
     const handleCardClick = (index: number) => {
         setCards((prevCards: Card[]) => {
             const newArray = [...prevCards];
-            const [removedCard] = newArray.splice(index, 1); // Supprime la carte cliquée
-            newArray.push(removedCard); // Ajoute la carte cliquée à la fin du tableau
+            const [removedCard] = newArray.splice(index, 1);
+            newArray.push(removedCard);
             return newArray;
         });
     };
@@ -54,12 +53,16 @@ export const CardStack = ({
                     console.error(`Card at index ${index} has missing content:`, card);
                     return null;
                 }
+                if (!card.buttons) {
+                    console.error(`Card at index ${index} has missing buttons:`, card);
+                    return null;
+                }
 
                 return (
                     <motion.div
                         key={card.id}
                         className="absolute bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-xl border-2 border-gray-200 border-solid flex flex-col justify-between cursor-pointer overflow-hidden"
-                        style={{ transformOrigin: "top center" }}
+                        style={{ transformOrigin: "top center", paddingBottom: "5rem" }}  // Ajout de padding pour éviter le chevauchement
                         animate={{
                             top: index * -CARD_OFFSET,
                             scale: 1 - index * SCALE_FACTOR,
@@ -75,9 +78,15 @@ export const CardStack = ({
                         <div className="font-normal text-neutral-700 dark:text-neutral-200 overflow-hidden text-ellipsis flex flex-wrap justify-between">
                             {card.content}
                         </div>
+                        <div
+                            className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t-gray-200 border-solid"
+                            onClick={(e) => e.stopPropagation()} // Empêche la propagation du clic
+                        >
+                            {card.buttons}
+                        </div>
                     </motion.div>
                 );
             })}
         </div>
     );
-}
+};

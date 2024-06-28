@@ -14,19 +14,12 @@ import { useI18n } from '@/locales/client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/common/select";
 import { Compass as DiscoverIcon } from 'lucide-react';
 import { CardStack } from "../components/results/card_v2";
-
-interface ElementData {
-  ElementName: string;
-  Illustration: string;
-  Explanation: string;
-}
-
-interface Diagram {
-  id: string;
-  title: string;
-  elements: ElementData[];
-  userPrompt?: string;
-}
+import { CopyButton } from '../components/button/copy-button';
+import { DownloadButton } from '../components/button/download-button';
+import DeleteButton from '../components/button/delete-button';
+import { PublishButton } from '../components/button/publish-button';
+import { Diagram } from 'next-auth';
+import { EditButton } from '../components/button/edit-button';
 
 export default function Home() {
   const { status, messages, input, handleInputChange, error, append } = useAssistant({ api: '/api/assistant' });
@@ -38,6 +31,18 @@ export default function Home() {
   const t = useI18n();
   const language = session?.user?.language;
   const isLoading = status === 'in_progress';
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleChange = (field: string, value: string) => {
+    setDiagrams((prev: Diagram[]) => {
+      const updatedDiagrams = [...prev];
+      const index = updatedDiagrams.findIndex((diagram) => diagram.id === field);
+      if (index !== -1) {
+        updatedDiagrams[index] = { ...updatedDiagrams[index], title: value };
+      }
+      return updatedDiagrams;
+    });
+  }
 
   useEffect(() => {
     const fetchDiagrams = async () => {
@@ -70,11 +75,33 @@ export default function Home() {
   const CARDS = diagrams.map((diagram, index) => ({
     id: diagram.id || `ID not available for diagram ${index + 1}`,
     name: diagram.title || `Title not available for diagram ${index + 1}`,
+    buttons: (
+      <div className="card-buttons flex justify-center items-center space-x-4 cursor-default">
+        <CopyButton targetId={`diagram-${diagram.id}`} />
+        <DownloadButton targetId={`diagram-${diagram.id}`} fileName={`${diagram.title}.json`} />
+        <PublishButton diagramID={diagram.id} />
+        <EditButton diagramID={diagram.id} diagramData={diagram} onSave={setDiagrams} onclick={() => setIsEditing(true)} />
+        <DeleteButton diagramID={diagram.id} />
+      </div>
+    ),
     content: (
-      <div className="card-content px-8 flex flex-wrap justify-between">
+      <div id={`diagram-${diagram.id}`} className="card-content px-8 pb-4 flex flex-wrap justify-between">
         {diagram.elements.map((element, elemIndex) => (
           <div key={elemIndex} className="element flex flex-col items-center mb-4 w-1/2 px-4 mt-5">
-            <h3 className="element-name text-sm font-bold mb-1 text-center">{element.ElementName || "Element name not available"}</h3>
+            {isEditing ? (
+              <input
+                type="text"
+                value={element.ElementName}
+                onChange={(e) => handleChange('name', e.target.value)}
+                placeholder="Name"
+                className="edit-input"
+              />
+            ) : (
+              <h3
+                className="element-name text-sm font-bold mb-1 text-center">
+                {element.ElementName || "Element name not available"}
+              </h3>
+            )}
             <img className="element-illustration w-full h-56 object-contain rounded-md mb-1 p-2" src={element.Illustration || ""} alt={element.ElementName} />
             <p className="element-explanation text-xs text-center">{element.Explanation || "Explanation not available"}</p>
           </div>
@@ -112,7 +139,7 @@ export default function Home() {
     if (!isLoading && messages.length > 0) {
       const userMessage = messages.filter((message) => message.role === "user").pop()?.content;
       if (userMessage) {
-        console.log("📩 User message received:", userMessage);  // Ajout de console.log
+        console.log("📩 User message received:", userMessage);
         setUserPrompt(userMessage);
       }
     }
@@ -120,15 +147,15 @@ export default function Home() {
 
   useEffect(() => {
     if (error) {
-      console.error("❌ An error occurred:", error);  // Ajout de console.log
+      console.error("❌ An error occurred:", error);
     }
   }, [error]);
 
   useEffect(() => {
     if (userPrompt) {
-      console.log("📝 Processing user prompt:", userPrompt);  // Log processing user prompt
+      console.log("📝 Processing user prompt:", userPrompt);
       const assistantMessages = messages.filter((message) => message.role === "assistant");
-      console.log("📨 Assistant messages:", assistantMessages);  // Log assistant messages
+      console.log("📨 Assistant messages:", assistantMessages);
 
       const filteredAndParsedMessages = assistantMessages
         .map((assistantMessage) => {
@@ -139,14 +166,14 @@ export default function Home() {
           try {
             return JSON.parse(cleanedContent);
           } catch (error) {
-            console.error("❌ Error parsing assistant message content:", error);  // Log parsing error
+            console.error("❌ Error parsing assistant message content:", error);
             return null;
           }
         })
         .filter((content) => content !== null);
 
       if (filteredAndParsedMessages.length > 0) {
-        console.log("📄 Filtered and parsed messages:", filteredAndParsedMessages);  // Log filtered and parsed messages
+        console.log("📄 Filtered and parsed messages:", filteredAndParsedMessages);
 
         const newDiagram = { ...filteredAndParsedMessages[filteredAndParsedMessages.length - 1], userPrompt };
         const updatedHistory = [...diagrams, newDiagram];
@@ -157,18 +184,18 @@ export default function Home() {
   }, [userPrompt]);
 
   const saveDiagram = async (diagram: any) => {
-    console.log("💾 Saving diagram...");  // Ajout de console.log
+    console.log("💾 Saving diagram...");
     try {
       const url = `/api/diagrams?content=${encodeURIComponent(JSON.stringify(diagram))}&isPublished=${diagram.isPublished}`;
       const response = await axios.post(url);
       if (response.status === 200) {
-        console.log("✅ Diagram saved successfully", response.data);  // Ajout de console.log
+        console.log("✅ Diagram saved successfully", response.data);
         setDiagrams(prevDiagrams => prevDiagrams.map(d => d === diagram ? { ...diagram, id: response.data.id } : d));
       } else {
-        console.error("❌ Failed to save diagram");  // Ajout de console.log
+        console.error("❌ Failed to save diagram");
       }
     } catch (error) {
-      console.error('❌ An error occurred while saving diagram:', error);  // Ajout de console.log
+      console.error('❌ An error occurred while saving diagram:', error);
     }
   };
 
@@ -182,19 +209,16 @@ export default function Home() {
 
   const handleStyleChange = (value: string) => {
     setStyle(value);
-    console.log("🎨 Style selected:", value);  // Ajout de console.log
+    console.log("🎨 Style selected:", value);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Ajouter les informations de langage et de style au prompt
     const enrichedPrompt = `${input} Please respond in ${language} for all parts of the response, except for keywords for illustrations and icon names in tags which should remain in English. Ensure that the title of the diagram, the names of elements, and the names of tags are all in ${language}. Only the keywords for illustrations and the icon names in tags should remain in English. Additionally, include the property "language" in the response JSON to indicate the language of the diagram. Also, ensure that the illustrations use the style ${style} when searching in the file and only use this style ${style}.`;
 
-    // Utiliser `append` pour ajouter le message enrichi
     try {
       await append({ role: 'user', content: enrichedPrompt });
-      console.log("📤 Submitting enriched message:", enrichedPrompt);  // Ajout de console.log
+      console.log("📤 Submitting enriched message:", enrichedPrompt);
     } catch (error) {
       console.error("❌ Failed to submit message:", error);
     }
@@ -241,7 +265,7 @@ export default function Home() {
         }
       </section >
 
-      <section className="w-full fixed bottom-0 bg-black p-8">
+      <section className="w-full fixed bottom-0 p-8">
         <div className="flex items-center mt-4 space-x-4 mb-4">
           <Select onValueChange={handleStyleChange}>
             <SelectTrigger className="bg-white p-2 rounded text-black w-20 hover:bg-accent hover:text-accent-foreground">

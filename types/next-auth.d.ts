@@ -25,6 +25,15 @@ declare module 'next-auth' {
     Explanation: string;
   }
 
+  interface Comment {
+    id: string;
+    userId: string;
+    diagramId: string;
+    user: User;
+    content: string;
+    createdAt: string;
+  }
+
   interface Diagram {
     createdAt: string | number | Date;
     content: any;
@@ -39,14 +48,5 @@ declare module 'next-auth' {
     views: number;
     tags: string[];
     comments: Comment[];
-  }
-
-  interface Comment {
-    id: string;
-    userId: string;
-    diagramId: string;
-    user: User;
-    content: string;
-    createdAt: string;
   }
 }

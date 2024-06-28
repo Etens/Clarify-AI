@@ -26,36 +26,29 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
 
       element.style.backgroundColor = 'white';
 
-      htmlToImage.toBlob(element)
-        .then((blob) => {
-          console.log('Blob généré:', blob);
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${fileName}.png`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-
-          if (promptElement) promptElement.style.display = 'block';
-          buttonElements.forEach(button => button.style.display = 'flex');
-
-          element.style.cssText = originalStyle;
-        })
-        .catch((error) => {
-          console.error('Erreur lors de la génération du blob:', error);
-
-          if (promptElement) promptElement.style.display = 'block';
-          buttonElements.forEach(button => button.style.display = 'flex');
-
-          element.style.cssText = originalStyle;
-        });
+      try {
+        const blob = await htmlToImage.toBlob(element);
+        console.log('Blob généré:', blob);
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${fileName}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la génération du blob:', error);
+      } finally {
+        if (promptElement) promptElement.style.display = 'block';
+        buttonElements.forEach(button => button.style.display = 'flex');
+        element.style.cssText = originalStyle;
+      }
     }
   };
 
   return (
-    <Button variant="default" size="icon" onClick={handleDownload} className="download-button button-icon hover:bg-black-500">
+    <Button variant="default" size="icon" onClick={handleDownload} className="download-button button-icon hover:bg-gray-700">
       <FileDown className="h-4 w-4 text-white" />
     </Button>
   );
