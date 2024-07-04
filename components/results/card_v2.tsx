@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { EditButton } from '../button/edit-button';
@@ -54,6 +53,7 @@ export const CardStack = ({
 
                 return (
                     <motion.div
+                        id={`diagram-${card.id}`}
                         key={card.id}
                         className={`absolute bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-xl border-2 ${isEditing ? 'border-blue-500' : 'border-gray-200'} border-solid flex flex-col justify-between cursor-pointer overflow-hidden`}
                         style={{ transformOrigin: "top center", paddingBottom: "5rem" }}
@@ -126,22 +126,22 @@ export const CardStack = ({
 
                             ) : (
                                 <>
-                                    <h1 className="text-neutral-500 font-medium dark:text-white">
+                                    <h1 className="text-neutral-500 font-medium dark:text-white text-lg mb-8">
                                         {card.title || "Title not available"}
                                     </h1>
                                     <div className="flex flex-wrap text-black">
                                         {card.elements.map((element) => (
                                             <div key={element.ElementName} className="w-1/2 p-2">
-                                                <h3 className="element-name text-sm font-bold mb-1 text-center">
+                                                <h3 className="element-name text-sm font-bold mb-1 text-center text-neutral-500 dark:text-white">
                                                     {element.ElementName || "Element name not available"}
                                                 </h3>
                                                 <img className="element-illustration w-full h-56 object-contain rounded-md mb-1 p-2" src={element.Illustration || ""} alt={element.ElementName} />
-                                                <p className="element-explanation text-xs text-center">{element.Explanation || "Explanation not available"}</p>
+                                                <p className="element-explanation text-xs text-center text-neutral-500 dark:text-white">{element.Explanation || "Explanation not available"}</p>
                                             </div>
                                         ))}
                                     </div>
                                     <div
-                                        className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t-gray-200 border-solid flex justify-center align-center"
+                                        className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t-gray-200 border-solid flex justify-center items-center"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <div className="card-buttons flex justify-center items-center space-x-4 cursor-default">
@@ -157,10 +157,14 @@ export const CardStack = ({
                                                 diagramData={editingCard || card}
                                                 onSave={handleSave}
                                             />
-                                            <CopyButton targetId={`diagram-${card.id}`} />
-                                            <PublishButton diagramID={card.id} />
-                                            <DownloadButton targetId={`diagram-${card.id}`} fileName={`${card.title}.json`} />
-                                            <DeleteButton diagramID={card.id} />
+                                            {isEditing ? null : (
+                                                <>
+                                                    <CopyButton diagramID={`diagram-${card.id}`} />
+                                                    <PublishButton diagramID={card.id} />
+                                                    <DownloadButton diagramID={`diagram-${card.id}`} fileName={`${card.title}.json`} />
+                                                    <DeleteButton diagramID={card.id} />
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </>

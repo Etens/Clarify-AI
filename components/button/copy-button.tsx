@@ -2,13 +2,15 @@ import { Copy } from "lucide-react";
 import { Button } from "./button";
 import * as htmlToImage from 'html-to-image';
 
-export function CopyButton({ targetId }: { targetId: string }) {
+export function CopyButton({ diagramID }: { diagramID: string }) {
   const handleCopy = async () => {
-    const element = document.getElementById(targetId);
+    console.log('📦 CopyButtonProps:', { diagramID });
+    const element = document.getElementById(diagramID);
     if (element) {
       const originalStyle = element.style.cssText;
 
-      element.style.width = '800px';
+      // Ajuster la taille de l'élément pour garantir qu'il est entièrement visible
+      element.style.width = 'auto';
       element.style.height = 'auto';
       element.style.transform = 'scale(1)';
       element.style.transformOrigin = 'top left';
@@ -22,7 +24,8 @@ export function CopyButton({ targetId }: { targetId: string }) {
       element.style.backgroundColor = 'white';
 
       try {
-        const blob = await htmlToImage.toBlob(element);
+        // Augmenter la qualité de l'image
+        const blob = await htmlToImage.toBlob(element, { quality: 1, pixelRatio: 2 });
         console.log('Blob généré:', blob);
         if (blob) {
           const item = new ClipboardItem({ 'image/png': blob });
@@ -35,6 +38,8 @@ export function CopyButton({ targetId }: { targetId: string }) {
         buttonElements.forEach(button => button.style.display = 'flex');
         element.style.cssText = originalStyle;
       }
+    } else {
+      console.error(`Element with ID ${diagramID} not found.`);
     }
   };
 

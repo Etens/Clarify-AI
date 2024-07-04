@@ -3,17 +3,18 @@ import * as htmlToImage from 'html-to-image';
 import { Button } from "./button";
 
 interface DownloadButtonProps {
-  targetId: string;
+  diagramID: string;
   fileName: string;
 }
 
-export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
+export function DownloadButton({ diagramID, fileName }: DownloadButtonProps) {
   const handleDownload = async () => {
-    const element = document.getElementById(targetId);
+    console.log('📦 DownloadButtonProps:', { diagramID, fileName });
+    const element = document.getElementById(diagramID);
     if (element) {
+      console.log(`Element with ID ${diagramID} found.`);
       const originalStyle = element.style.cssText;
-
-      element.style.width = '800px';
+      element.style.width = 'auto';
       element.style.height = 'auto';
       element.style.transform = 'scale(1)';
       element.style.transformOrigin = 'top left';
@@ -27,7 +28,8 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
       element.style.backgroundColor = 'white';
 
       try {
-        const blob = await htmlToImage.toBlob(element);
+        // Augmenter la qualité de l'image
+        const blob = await htmlToImage.toBlob(element, { quality: 1, pixelRatio: 2 });
         console.log('Blob généré:', blob);
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -44,6 +46,8 @@ export function DownloadButton({ targetId, fileName }: DownloadButtonProps) {
         buttonElements.forEach(button => button.style.display = 'flex');
         element.style.cssText = originalStyle;
       }
+    } else {
+      console.error(`Element with ID ${diagramID} not found.`);
     }
   };
 
