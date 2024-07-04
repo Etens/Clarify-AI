@@ -125,6 +125,7 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
+
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession({ req, ...authOptions });
 
@@ -133,22 +134,25 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  const isPublished = searchParams.get('isPublished') === 'true';
-
-  if (!id) {
-    return NextResponse.json({ message: '⚠️ ID is required' }, { status: 400 });
-  }
-
   try {
-    console.log('🛠 Updating diagram with ID:', id);
+    const { id, title, elements } = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ message: '⚠️ ID is required' }, { status: 400 });
+    }
+
+    console.log('🔄 Updating diagram with ID:', id);
     const updatedDiagram = await prisma.diagram.update({
       where: { id },
-      data: { isPublished },
+      data: {
+        content: {
+          title,
+          elements
+        }
+      },
     });
 
-    console.log('✅ Diagram updated successfully');
+    console.log('✅ Diagram updated successfully:', updatedDiagram);
     return NextResponse.json(updatedDiagram, { status: 200 });
   } catch (error: any) {
     console.log('❌ Error updating diagram:', error.message);

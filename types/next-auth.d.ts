@@ -49,4 +49,9 @@ declare module 'next-auth' {
     tags: string[];
     comments: Comment[];
   }
+
+  interface Card extends Diagram {
+    name: string;
+    buttons: React.ReactNode;
+  }
 }
