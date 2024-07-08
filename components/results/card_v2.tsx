@@ -135,7 +135,7 @@ export const CardStack = ({
                                                 <h3 className="element-name text-sm font-bold mb-1 text-center text-neutral-500 dark:text-white">
                                                     {element.ElementName || "Element name not available"}
                                                 </h3>
-                                                <img className="element-illustration w-full h-56 object-contain rounded-md mb-1 p-2" src={element.Illustration || ""} alt={element.ElementName} />
+                                                <img className="element-illustration w-full h-56 object-contain rounded-md mb-1 p-2" src={element.Illustration || ""} />
                                                 <p className="element-explanation text-xs text-center text-neutral-500 dark:text-white">{element.Explanation || "Explanation not available"}</p>
                                             </div>
                                         ))}

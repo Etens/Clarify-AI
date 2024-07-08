@@ -9,17 +9,12 @@ interface PublishButtonProps {
 export function PublishButton({ diagramID }: PublishButtonProps) {
 
   const handlePublishDiagram = async () => {
-    if (!diagramID) {
-      console.error('Diagram ID is required');
-      return;
-    }
-
     try {
-      console.log("Publishing diagram with ID:", diagramID);
-      await axios.patch(`/api/diagrams?id=${diagramID}&isPublished=true`);
-      console.log("Diagram published successfully");
-    } catch (error) {
-      console.error('An error occurred while publishing diagram:', error);
+      console.log('📤 Publishing diagram:', diagramID);
+      const response = await axios.patch(`/api/diagrams/published?diagramID=${diagramID}`);
+      console.log('✅ Diagram published:', response.data);
+    } catch (error: any) {
+      console.error('❌ Error publishing diagram:', error.message);
     }
   };
 

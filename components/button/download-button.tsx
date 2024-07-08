@@ -28,7 +28,6 @@ export function DownloadButton({ diagramID, fileName }: DownloadButtonProps) {
       element.style.backgroundColor = 'white';
 
       try {
-        // Augmenter la qualité de l'image
         const blob = await htmlToImage.toBlob(element, { quality: 1, pixelRatio: 2 });
         console.log('Blob généré:', blob);
         if (blob) {

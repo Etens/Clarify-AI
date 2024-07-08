@@ -9,7 +9,6 @@ export function CopyButton({ diagramID }: { diagramID: string }) {
     if (element) {
       const originalStyle = element.style.cssText;
 
-      // Ajuster la taille de l'élément pour garantir qu'il est entièrement visible
       element.style.width = 'auto';
       element.style.height = 'auto';
       element.style.transform = 'scale(1)';
@@ -24,7 +23,6 @@ export function CopyButton({ diagramID }: { diagramID: string }) {
       element.style.backgroundColor = 'white';
 
       try {
-        // Augmenter la qualité de l'image
         const blob = await htmlToImage.toBlob(element, { quality: 1, pixelRatio: 2 });
         console.log('Blob généré:', blob);
         if (blob) {

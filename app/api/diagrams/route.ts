@@ -5,6 +5,8 @@ import { authOptions } from '../auth/[...nextauth]/route';
 
 const prisma = new PrismaClient();
 
+
+// ------- Get Diagrams -------
 export async function GET(req: NextRequest) {
   console.log('🔍 Fetching diagrams');
   const session = await getServerSession({ req, ...authOptions });
@@ -27,6 +29,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: 'An error occurred while fetching diagrams', error: error.message }, { status: 500 });
   }
 }
+
+// ------- Create Diagram -------
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession({ req, ...authOptions });
@@ -63,6 +67,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'An error occurred while creating diagram', error: error.message }, { status: 500 });
   }
 }
+
+// ------- Delete Diagram -------
 
 export async function DELETE(req: NextRequest) {
   const session = await getServerSession({ req, ...authOptions });
@@ -125,7 +131,7 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-
+// ------- Edit Diagram -------
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession({ req, ...authOptions });
 
